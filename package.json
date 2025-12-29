@@ -1,0 +1,22 @@
+{
+  "name": "webcraft-studio",
+  "version": "1.0.0",
+  "description": "WebCraft Studio - Drag & Drop Web Site Builder",
+  "scripts": {
+    "start": "concurrently --kill-others-on-fail \"npm run start:backend\" \"npm run start:frontend\"",
+    "dev": "concurrently --kill-others-on-fail -n \"BACKEND,FRONTEND\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "setup": "npm run install:all && npm run db:create",
+    "db:create": "cd database && node ../backend/services/init-db.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
