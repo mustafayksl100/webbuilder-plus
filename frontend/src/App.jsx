@@ -4,7 +4,6 @@ import { useAuthStore } from './store/authStore';
 
 // Layout
 import Layout from './components/layout/Layout';
-import AuthLayout from './components/layout/AuthLayout';
 
 // Pages
 import Login from './pages/Login';
@@ -84,23 +83,22 @@ function App() {
 
             <Routes>
                 {/* Public Routes */}
-                <Route element={<AuthLayout />}>
-                    <Route path="/login" element={
-                        <PublicRoute>
-                            <Login />
-                        </PublicRoute>
-                    } />
-                    <Route path="/register" element={
-                        <PublicRoute>
-                            <Register />
-                        </PublicRoute>
-                    } />
-                    <Route path="/forgot-password" element={
-                        <PublicRoute>
-                            <ForgotPassword />
-                        </PublicRoute>
-                    } />
-                </Route>
+                {/* Public Routes */}
+                <Route path="/login" element={
+                    <PublicRoute>
+                        <Login />
+                    </PublicRoute>
+                } />
+                <Route path="/register" element={
+                    <PublicRoute>
+                        <Register />
+                    </PublicRoute>
+                } />
+                <Route path="/forgot-password" element={
+                    <PublicRoute>
+                        <ForgotPassword />
+                    </PublicRoute>
+                } />
 
                 {/* Protected Routes */}
                 <Route element={
