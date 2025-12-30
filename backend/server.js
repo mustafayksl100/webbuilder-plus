@@ -21,6 +21,7 @@ const authRoutes = require('./routes/auth');
 const projectRoutes = require('./routes/projects');
 const creditRoutes = require('./routes/credits');
 const exportRoutes = require('./routes/export');
+const adminRoutes = require('./routes/admin');
 
 // Initialize Express app
 const app = express();
@@ -98,6 +99,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/credits', creditRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Swagger Documentation
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
