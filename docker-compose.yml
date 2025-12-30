@@ -12,11 +12,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-Mustafa1024.}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d webcraft_studio"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d webcraft_studio" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -69,6 +69,7 @@ services:
 volumes:
   postgres_data:
   backend_uploads:
+
 
 networks:
   webcraft-network:
