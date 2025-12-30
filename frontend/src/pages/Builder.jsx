@@ -129,20 +129,18 @@ const COMPONENT_TYPES = [
 
 
     // ═══════════════════════════════════════════════════════════════
-    // SECTIONS (15 components)
+    // SECTIONS (12 components)
     // ═══════════════════════════════════════════════════════════════
     { type: 'hero', label: 'Hero Section', icon: Sparkles, category: 'sections' },
     { type: 'cta', label: 'CTA (Aksiyon)', icon: Target, category: 'sections' },
     { type: 'banner', label: 'Banner', icon: Award, category: 'sections' },
     { type: 'about', label: 'Hakkımızda', icon: FileText, category: 'sections' },
-    { type: 'features', label: 'Özellikler', icon: Star, category: 'sections' },
-    { type: 'services', label: 'Hizmetler', icon: Zap, category: 'sections' },
     { type: 'stats', label: 'İstatistikler', icon: BarChart3, category: 'sections' },
     { type: 'timeline', label: 'Zaman Çizelgesi', icon: Activity, category: 'sections' },
     { type: 'faq', label: 'SSS', icon: MessageSquare, category: 'sections' },
     { type: 'team', label: 'Ekip', icon: Users, category: 'sections' },
     { type: 'testimonials', label: 'Yorumlar', icon: Quote, category: 'sections' },
-    { type: 'clients', label: 'Müşteriler/Logolar', icon: Heart, category: 'sections' },
+    { type: 'clients', label: 'Ortaklar', icon: Heart, category: 'sections' },
     { type: 'blog', label: 'Blog Yazıları', icon: FileText, category: 'sections' },
     { type: 'portfolio', label: 'Portfolyo', icon: Palette, category: 'sections' },
 
@@ -166,8 +164,6 @@ const COMPONENT_TYPES = [
     { type: 'slider', label: 'Slider', icon: Film, category: 'media' },
     { type: 'mediatext', label: 'Medya + Metin', icon: Columns, category: 'media' },
     { type: 'audio', label: 'Ses Oynatıcı', icon: Music, category: 'media' },
-    { type: 'file', label: 'Dosya İndirme', icon: FileDown, category: 'media' },
-    { type: 'iconbox', label: 'İkon Kutusu', icon: Boxes, category: 'media' },
 
     // ═══════════════════════════════════════════════════════════════
     // WIDGETS (8 components)
@@ -289,7 +285,8 @@ const Builder = () => {
     const {
         components,
         setComponents,
-        addComponent,
+
+        addComponent: addComponentStore,
         updateComponent,
         deleteComponent,
         moveComponent,
@@ -319,6 +316,42 @@ const Builder = () => {
     const [activeId, setActiveId] = useState(null);
     const [showExportModal, setShowExportModal] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Sidebar State
+    const [expandedCategories, setExpandedCategories] = useState({
+        layout: true,
+        sections: true,
+        media: false,
+        content: false,
+        widgets: false,
+        commerce: false,
+        forms: false
+    });
+
+    const toggleCategory = (catId) => {
+        setExpandedCategories(prev => ({
+            ...prev,
+            [catId]: !prev[catId]
+        }));
+    };
+
+    // Enhanced addComponent with auto-scroll
+    const addComponent = (component) => {
+        addComponentStore(component);
+
+        // Auto-scroll to the new component
+        setTimeout(() => {
+            const element = document.getElementById(component.id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Briefly flash the element to highlight it
+                element.classList.add('ring-2', 'ring-primary-500', 'ring-offset-2', 'ring-offset-dark-900');
+                setTimeout(() => {
+                    element.classList.remove('ring-2', 'ring-primary-500', 'ring-offset-2', 'ring-offset-dark-900');
+                }, 1000);
+            }
+        }, 100);
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -551,20 +584,83 @@ const Builder = () => {
                 title: 'Müşteri Yorumları',
                 subtitle: 'Müşterilerimiz ne diyor?',
                 items: [
-                    { name: 'Ali Öztürk', company: 'ABC Şirketi', text: 'Harika bir ekip! Projemizi zamanında ve mükemmel bir şekilde teslim ettiler.', rating: 5, image: 'https://randomuser.me/api/portraits/men/10.jpg' },
-                    { name: 'Fatma Korkmaz', company: 'XYZ Ltd.', text: 'Profesyonel yaklaşımları ve yaratıcı çözümleri ile beklentilerimizi aştılar.', rating: 5, image: 'https://randomuser.me/api/portraits/women/11.jpg' },
-                    { name: 'Burak Şahin', company: 'Tech Start', text: 'E-ticaret sitemiz sayesinde satışlarımız %200 arttı. Teşekkürler!', rating: 5, image: 'https://randomuser.me/api/portraits/men/12.jpg' }
+                    { name: 'Ali Öztürk', text: 'Harika bir ekip! Projemizi zamanında ve mükemmel bir şekilde teslim ettiler.', rating: 5 },
+                    { name: 'Fatma Korkmaz', text: 'Profesyonel yaklaşımları ve yaratıcı çözümleri ile beklentilerimizi aştılar.', rating: 5 },
+                    { name: 'Burak Şahin', text: 'E-ticaret sitemiz sayesinde satışlarımız %200 arttı. Teşekkürler!', rating: 5 }
                 ]
             },
             clients: {
                 title: 'Güvenilir İş Ortaklarımız',
-                logos: [
-                    { name: 'Google', url: '#' },
-                    { name: 'Microsoft', url: '#' },
-                    { name: 'Amazon', url: '#' },
-                    { name: 'Apple', url: '#' },
-                    { name: 'Meta', url: '#' }
+                partners: [
+                    { name: 'Google', logo: '' },
+                    { name: 'Microsoft', logo: '' },
+                    { name: 'Amazon', logo: '' },
+                    { name: 'Apple', logo: '' },
+                    { name: 'Meta', logo: '' }
                 ]
+            },
+
+            // Widgets Defaults
+            search: {
+                placeholder: 'Sitede ara...',
+                buttonText: 'Ara',
+                style: 'minimal' // minimal, rounded, classic
+            },
+            socialicons: {
+                style: 'circle', // circle, square, minimal
+                color: 'brand', // brand, custom
+                icons: [
+                    { network: 'facebook', url: '#' },
+                    { network: 'twitter', url: '#' },
+                    { network: 'instagram', url: '#' },
+                    { network: 'linkedin', url: '#' }
+                ]
+            },
+            calendar: {
+                title: 'Takvim',
+                events: [
+                    { day: 15, title: 'Toplantı' },
+                    { day: 22, title: 'Proje Teslimi' }
+                ]
+            },
+            archives: {
+                title: 'Arşivler',
+                style: 'list',
+                items: [
+                    { label: 'Mart 2024', count: 12 },
+                    { label: 'Şubat 2024', count: 8 },
+                    { label: 'Ocak 2024', count: 15 },
+                    { label: 'Aralık 2023', count: 22 }
+                ]
+            },
+            categories: {
+                title: 'Kategoriler',
+                style: 'badges', // list, badges
+                items: [
+                    { label: 'Teknoloji', count: 45 },
+                    { label: 'Tasarım', count: 28 },
+                    { label: 'Yazılım', count: 32 },
+                    { label: 'Pazarlama', count: 15 }
+                ]
+            },
+            latestposts: {
+                title: 'Son Yazılar',
+                showImage: true,
+                count: 3,
+                posts: [
+                    { title: 'Modern Web Tasarım Trendleri', date: '12 Mart 2024', image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=150' },
+                    { title: 'SEO İpuçları 2024', date: '08 Mart 2024', image: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=150' },
+                    { title: 'React Performance Optimizasyonu', date: '01 Mart 2024', image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=150' }
+                ]
+            },
+            customhtml: {
+                title: 'Özel HTML',
+                code: '<div style="padding: 20px; background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; color: #15803d; text-align: center;">\n  <strong>🎉 Özel HTML Alanı</strong>\n  <p>Buraya kendi HTML/CSS kodlarınızı ekleyebilirsiniz.</p>\n</div>'
+            },
+            weather: {
+                city: 'Istanbul',
+                unit: 'C',
+                style: 'card' // card, minimal
             },
 
             // Media
@@ -585,6 +681,16 @@ const Builder = () => {
                 title: 'Tanıtım Videosu',
                 url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
                 thumbnail: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800'
+            },
+            audio: {
+                title: 'Podcast Bölüm 1',
+                url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+            },
+            mediatext: {
+                title: 'Görsel ve Metin',
+                content: 'Buraya görselinizle ilgili etkileyici bir açıklama metni ekleyin. Ürünlerinizi veya hizmetlerinizi detaylıca tanıtmak için harika bir alan.',
+                image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800',
+                imagePos: 'left'
             },
             image: { src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800', alt: 'Resim', width: 'full', rounded: true },
             slider: {
@@ -975,187 +1081,51 @@ const Builder = () => {
                                 Bileşenler
                             </h3>
 
-                            {/* Layout */}
-                            <div className="mb-4">
-                                <div className="text-xs text-dark-500 mb-2 flex items-center gap-1">
-                                    <Layout className="w-3 h-3" /> Layout
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {COMPONENT_TYPES.filter(c => c.category === 'layout').map((comp) => (
-                                        <div
-                                            key={comp.type}
-                                            id={`panel-${comp.type}`}
-                                            className="p-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-colors text-center"
-                                            onClick={() => {
-                                                const newComponent = {
-                                                    id: `${comp.type}-${Date.now()}`,
-                                                    type: comp.type,
-                                                    data: getDefaultComponentData(comp.type)
-                                                };
-                                                addComponent(newComponent);
-                                            }}
+                            <div className="space-y-2">
+                                {COMPONENT_CATEGORIES.map((category) => (
+                                    <div key={category.id} className="rounded-lg overflow-hidden bg-dark-800/30 border border-dark-700/50">
+                                        <button
+                                            onClick={() => toggleCategory(category.id)}
+                                            className="w-full flex items-center justify-between p-3 hover:bg-dark-800 transition-colors"
                                         >
-                                            <comp.icon className="w-5 h-5 text-primary-400 mx-auto mb-1" />
-                                            <span className="text-xs text-dark-300">{comp.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                                            <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider ${category.color}`}>
+                                                <category.icon className="w-3.5 h-3.5" />
+                                                {category.label}
+                                            </div>
+                                            <ChevronDown
+                                                className={`w-4 h-4 text-dark-400 transition-transform duration-200 ${expandedCategories[category.id] ? 'rotate-180' : ''}`}
+                                            />
+                                        </button>
 
-                            {/* Sections */}
-                            <div className="mb-4">
-                                <div className="text-xs text-dark-500 mb-2 flex items-center gap-1">
-                                    <Box className="w-3 h-3" /> Bölümler
-                                </div>
-                                <div className="space-y-1 max-h-[250px] overflow-y-auto">
-                                    {COMPONENT_TYPES.filter(c => c.category === 'sections').map((comp) => (
-                                        <div
-                                            key={comp.type}
-                                            className="flex items-center gap-3 p-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-colors"
-                                            onClick={() => {
-                                                const newComponent = {
-                                                    id: `${comp.type}-${Date.now()}`,
-                                                    type: comp.type,
-                                                    data: getDefaultComponentData(comp.type)
-                                                };
-                                                addComponent(newComponent);
-                                            }}
-                                        >
-                                            <comp.icon className="w-4 h-4 text-primary-400" />
-                                            <span className="text-sm text-dark-300">{comp.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Media */}
-                            <div className="mb-4">
-                                <div className="text-xs text-dark-500 mb-2 flex items-center gap-1">
-                                    <Image className="w-3 h-3" /> Medya
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {COMPONENT_TYPES.filter(c => c.category === 'media').map((comp) => (
-                                        <div
-                                            key={comp.type}
-                                            className="p-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-colors text-center"
-                                            onClick={() => {
-                                                const newComponent = {
-                                                    id: `${comp.type}-${Date.now()}`,
-                                                    type: comp.type,
-                                                    data: getDefaultComponentData(comp.type)
-                                                };
-                                                addComponent(newComponent);
-                                            }}
-                                        >
-                                            <comp.icon className="w-5 h-5 text-green-400 mx-auto mb-1" />
-                                            <span className="text-xs text-dark-300">{comp.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Content */}
-                            <div>
-                                <div className="text-xs text-dark-500 mb-2 flex items-center gap-1">
-                                    <Type className="w-3 h-3" /> İçerik
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {COMPONENT_TYPES.filter(c => c.category === 'content').map((comp) => (
-                                        <div
-                                            key={comp.type}
-                                            className="p-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-colors text-center"
-                                            onClick={() => {
-                                                const newComponent = {
-                                                    id: `${comp.type}-${Date.now()}`,
-                                                    type: comp.type,
-                                                    data: getDefaultComponentData(comp.type)
-                                                };
-                                                addComponent(newComponent);
-                                            }}
-                                        >
-                                            <comp.icon className="w-5 h-5 text-amber-400 mx-auto mb-1" />
-                                            <span className="text-xs text-dark-300">{comp.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Widgets */}
-                            <div className="mb-4">
-                                <div className="text-xs text-dark-500 mb-2 flex items-center gap-1">
-                                    <Settings className="w-3 h-3" /> Widgetlar
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {COMPONENT_TYPES.filter(c => c.category === 'widgets').map((comp) => (
-                                        <div
-                                            key={comp.type}
-                                            className="p-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-colors text-center"
-                                            onClick={() => {
-                                                const newComponent = {
-                                                    id: `${comp.type}-${Date.now()}`,
-                                                    type: comp.type,
-                                                    data: getDefaultComponentData(comp.type)
-                                                };
-                                                addComponent(newComponent);
-                                            }}
-                                        >
-                                            <comp.icon className="w-5 h-5 text-cyan-400 mx-auto mb-1" />
-                                            <span className="text-xs text-dark-300">{comp.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* E-Commerce */}
-                            <div className="mb-4">
-                                <div className="text-xs text-dark-500 mb-2 flex items-center gap-1">
-                                    <ShoppingCart className="w-3 h-3" /> E-Ticaret
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {COMPONENT_TYPES.filter(c => c.category === 'commerce').map((comp) => (
-                                        <div
-                                            key={comp.type}
-                                            className="p-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-colors text-center"
-                                            onClick={() => {
-                                                const newComponent = {
-                                                    id: `${comp.type}-${Date.now()}`,
-                                                    type: comp.type,
-                                                    data: getDefaultComponentData(comp.type)
-                                                };
-                                                addComponent(newComponent);
-                                            }}
-                                        >
-                                            <comp.icon className="w-5 h-5 text-pink-400 mx-auto mb-1" />
-                                            <span className="text-xs text-dark-300">{comp.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Forms */}
-                            <div className="mb-4">
-                                <div className="text-xs text-dark-500 mb-2 flex items-center gap-1">
-                                    <FormInput className="w-3 h-3" /> Formlar
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {COMPONENT_TYPES.filter(c => c.category === 'forms').map((comp) => (
-                                        <div
-                                            key={comp.type}
-                                            className="p-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-colors text-center"
-                                            onClick={() => {
-                                                const newComponent = {
-                                                    id: `${comp.type}-${Date.now()}`,
-                                                    type: comp.type,
-                                                    data: getDefaultComponentData(comp.type)
-                                                };
-                                                addComponent(newComponent);
-                                            }}
-                                        >
-                                            <comp.icon className="w-5 h-5 text-teal-400 mx-auto mb-1" />
-                                            <span className="text-xs text-dark-300">{comp.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                                        {expandedCategories[category.id] && (
+                                            <div className="p-2 border-t border-dark-700/50 grid grid-cols-2 gap-2 animate-in slide-in-from-top-2 duration-200">
+                                                {COMPONENT_TYPES.filter(c => c.category === category.id).map((comp) => (
+                                                    <div
+                                                        key={comp.type}
+                                                        draggable
+                                                        onDragStart={(e) => {
+                                                            e.dataTransfer.setData('componentType', comp.type);
+                                                        }}
+                                                        className="p-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg hover:border-dark-500 group relative text-center"
+                                                        onClick={() => {
+                                                            const newComponent = {
+                                                                id: `${comp.type}-${Date.now()}`,
+                                                                type: comp.type,
+                                                                data: getDefaultComponentData(comp.type)
+                                                            };
+                                                            addComponent(newComponent);
+                                                        }}
+                                                    >
+                                                        <comp.icon className={`w-6 h-6 mx-auto mb-2 opacity-70 group-hover:opacity-100 transition-opacity ${category.color.replace('text-', 'text-')}`} />
+                                                        <span className="text-[10px] sm:text-xs text-dark-300 font-medium block truncate">
+                                                            {comp.label}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -2062,7 +2032,7 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                 return (
                     <>
                         <div>
-                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
                             <input
                                 type="text"
                                 value={component.data?.title || ''}
@@ -2134,12 +2104,22 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                 return (
                     <>
                         <div>
-                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
                             <input
                                 type="text"
                                 value={component.data?.title || ''}
                                 onChange={(e) => updateField('title', e.target.value)}
                                 className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Müşteri Yorumları"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#f9fafb'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
                             />
                         </div>
                         <div>
@@ -2148,32 +2128,31 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 {(component.data?.items || []).map((item, index) => (
                                     <div key={index} className="p-3 bg-dark-800/50 rounded-lg space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-dark-400">Yorum #{index + 1}</span>
+                                            <span className="text-xs text-dark-400">Yorum {index + 1}</span>
                                             <button
                                                 onClick={() => removeArrayItem('items', index)}
-                                                className="text-red-400"
+                                                className="text-red-400 hover:text-red-300 text-xs"
                                             >
-                                                <X className="w-3 h-3" />
+                                                Sil
                                             </button>
                                         </div>
                                         <input
                                             type="text"
                                             value={item.name || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], name: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
+                                            onChange={(e) => updateArrayItem('items', index, { ...item, name: e.target.value })}
                                             placeholder="Müşteri Adı"
                                             className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
                                         />
+                                        <input
+                                            type="text"
+                                            value={item.company || ''}
+                                            onChange={(e) => updateArrayItem('items', index, { ...item, company: e.target.value })}
+                                            placeholder="Şirket / Ünvan"
+                                            className="hidden" // Hiding entirely as requested
+                                        />
                                         <textarea
                                             value={item.text || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], text: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
+                                            onChange={(e) => updateArrayItem('items', index, { ...item, text: e.target.value })}
                                             placeholder="Yorum metni..."
                                             rows={2}
                                             className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white resize-none"
@@ -2182,7 +2161,7 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 ))}
                                 <button
                                     onClick={() => addArrayItem('items', { name: '', text: '' })}
-                                    className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
+                                    className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
                                 >
                                     + Yorum Ekle
                                 </button>
@@ -2191,273 +2170,28 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                     </>
                 );
 
-            case 'cta':
-                return (
-                    <>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
-                            <input
-                                type="text"
-                                value={component.data?.title || ''}
-                                onChange={(e) => updateField('title', e.target.value)}
-                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Alt Başlık</label>
-                            <input
-                                type="text"
-                                value={component.data?.subtitle || ''}
-                                onChange={(e) => updateField('subtitle', e.target.value)}
-                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
-                            <input
-                                type="text"
-                                value={component.data?.buttonText || ''}
-                                onChange={(e) => updateField('buttonText', e.target.value)}
-                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Arka Plan Rengi</label>
-                            <input
-                                type="color"
-                                value={component.data?.bgColor || '#3b82f6'}
-                                onChange={(e) => updateField('bgColor', e.target.value)}
-                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
-                            />
-                        </div>
-                    </>
-                );
 
-            case 'banner':
-                return (
-                    <>
-                        <p className="text-sm text-dark-400 mb-3">Kayan Banner Öğeleri</p>
-                        <div className="space-y-4">
-                            {(component.data?.items || []).map((item, index) => (
-                                <div key={index} className="p-3 bg-dark-800/50 rounded-lg space-y-2 relative">
-                                    <button
-                                        onClick={() => removeArrayItem('items', index)}
-                                        className="absolute top-2 right-2 p-1 text-red-400 hover:bg-red-500/10 rounded"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                    <div>
-                                        <label className="block text-xs text-dark-400 mb-1">Banner Metni</label>
-                                        <input
-                                            type="text"
-                                            value={item.text || ''}
-                                            onChange={(e) => {
-                                                const items = [...(component.data?.items || [])];
-                                                items[index] = { ...items[index], text: e.target.value };
-                                                updateField('items', items);
-                                            }}
-                                            className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-sm text-white"
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
-                                            <input
-                                                type="text"
-                                                value={item.buttonText || ''}
-                                                onChange={(e) => {
-                                                    const items = [...(component.data?.items || [])];
-                                                    items[index] = { ...items[index], buttonText: e.target.value };
-                                                    updateField('items', items);
-                                                }}
-                                                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-sm text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs text-dark-400 mb-1">Buton Linki</label>
-                                            <input
-                                                type="text"
-                                                value={item.link || ''}
-                                                onChange={(e) => {
-                                                    const items = [...(component.data?.items || [])];
-                                                    items[index] = { ...items[index], link: e.target.value };
-                                                    updateField('items', items);
-                                                }}
-                                                placeholder="#veya https://..."
-                                                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-sm text-white"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            <button
-                                onClick={() => addArrayItem('items', { text: '🎉 Yeni Kampanya!', buttonText: 'İncele', link: '#' })}
-                                className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
-                            >
-                                + Banner Öğesi Ekle
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 mt-4">
-                            <div>
-                                <label className="block text-xs text-dark-400 mb-1">Gradient Renk 1</label>
-                                <input
-                                    type="color"
-                                    value={component.data?.bgColor || '#3b82f6'}
-                                    onChange={(e) => updateField('bgColor', e.target.value)}
-                                    className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs text-dark-400 mb-1">Gradient Renk 2</label>
-                                <input
-                                    type="color"
-                                    value={component.data?.bgColorEnd || '#8b5cf6'}
-                                    onChange={(e) => updateField('bgColorEnd', e.target.value)}
-                                    className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
-                                />
-                            </div>
-                        </div>
-                    </>
-                );
-
-
-            case 'stats':
-                return (
-                    <>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
-                            <input
-                                type="text"
-                                value={component.data?.title || ''}
-                                onChange={(e) => updateField('title', e.target.value)}
-                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-2">İstatistikler</label>
-                            <div className="space-y-3">
-                                {(component.data?.items || []).map((item, index) => (
-                                    <div key={index} className="p-3 bg-dark-800/50 rounded-lg space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-xs text-dark-400">#{index + 1}</span>
-                                            <button onClick={() => removeArrayItem('items', index)} className="text-red-400">
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={item.value || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], value: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
-                                            placeholder="Değer (örn: 500+)"
-                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
-                                        />
-                                        <input
-                                            type="text"
-                                            value={item.label || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], label: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
-                                            placeholder="Etiket (örn: Müşteri)"
-                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
-                                        />
-                                    </div>
-                                ))}
-                                <button
-                                    onClick={() => addArrayItem('items', { value: '0', label: 'Yeni' })}
-                                    className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
-                                >
-                                    + İstatistik Ekle
-                                </button>
-                            </div>
-                        </div>
-                    </>
-                );
-
-            case 'timeline':
-                return (
-                    <>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
-                            <input
-                                type="text"
-                                value={component.data?.title || ''}
-                                onChange={(e) => updateField('title', e.target.value)}
-                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-2">Zaman Çizelgesi</label>
-                            <div className="space-y-3">
-                                {(component.data?.items || []).map((item, index) => (
-                                    <div key={index} className="p-3 bg-dark-800/50 rounded-lg space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-xs text-dark-400">#{index + 1}</span>
-                                            <button onClick={() => removeArrayItem('items', index)} className="text-red-400">
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={item.year || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], year: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
-                                            placeholder="Yıl"
-                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
-                                        />
-                                        <input
-                                            type="text"
-                                            value={item.title || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], title: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
-                                            placeholder="Başlık"
-                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
-                                        />
-                                        <input
-                                            type="text"
-                                            value={item.description || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], description: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
-                                            placeholder="Açıklama"
-                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
-                                        />
-                                    </div>
-                                ))}
-                                <button
-                                    onClick={() => addArrayItem('items', { year: '2024', title: '', description: '' })}
-                                    className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
-                                >
-                                    + Olay Ekle
-                                </button>
-                            </div>
-                        </div>
-                    </>
-                );
 
             case 'faq':
                 return (
                     <>
                         <div>
-                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
                             <input
                                 type="text"
                                 value={component.data?.title || ''}
                                 onChange={(e) => updateField('title', e.target.value)}
                                 className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Sıkça Sorulan Sorular"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#f9fafb'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
                             />
                         </div>
                         <div>
@@ -2466,29 +2200,24 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 {(component.data?.items || []).map((item, index) => (
                                     <div key={index} className="p-3 bg-dark-800/50 rounded-lg space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-dark-400">Soru #{index + 1}</span>
-                                            <button onClick={() => removeArrayItem('items', index)} className="text-red-400">
-                                                <X className="w-3 h-3" />
+                                            <span className="text-xs text-dark-400">Soru {index + 1}</span>
+                                            <button
+                                                onClick={() => removeArrayItem('items', index)}
+                                                className="text-red-400 hover:text-red-300 text-xs"
+                                            >
+                                                Sil
                                             </button>
                                         </div>
                                         <input
                                             type="text"
                                             value={item.question || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], question: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
+                                            onChange={(e) => updateArrayItem('items', index, { ...item, question: e.target.value })}
                                             placeholder="Soru"
-                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                            className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
                                         />
                                         <textarea
                                             value={item.answer || ''}
-                                            onChange={(e) => {
-                                                const newItems = [...(component.data?.items || [])];
-                                                newItems[index] = { ...newItems[index], answer: e.target.value };
-                                                updateField('items', newItems);
-                                            }}
+                                            onChange={(e) => updateArrayItem('items', index, { ...item, answer: e.target.value })}
                                             placeholder="Cevap"
                                             rows={2}
                                             className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white resize-none"
@@ -2497,7 +2226,7 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 ))}
                                 <button
                                     onClick={() => addArrayItem('items', { question: '', answer: '' })}
-                                    className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
+                                    className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
                                 >
                                     + Soru Ekle
                                 </button>
@@ -2506,49 +2235,7 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                     </>
                 );
 
-            case 'clients':
-                return (
-                    <>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
-                            <input
-                                type="text"
-                                value={component.data?.title || ''}
-                                onChange={(e) => updateField('title', e.target.value)}
-                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-2">Müşteri/Logo İsimleri</label>
-                            <div className="space-y-2">
-                                {(component.data?.logos || []).map((logo, index) => (
-                                    <div key={index} className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={logo.name || ''}
-                                            onChange={(e) => {
-                                                const newLogos = [...(component.data?.logos || [])];
-                                                newLogos[index] = { ...newLogos[index], name: e.target.value };
-                                                updateField('logos', newLogos);
-                                            }}
-                                            placeholder="Şirket Adı"
-                                            className="flex-1 px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
-                                        />
-                                        <button onClick={() => removeArrayItem('logos', index)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded">
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                ))}
-                                <button
-                                    onClick={() => addArrayItem('logos', { name: 'Yeni Müşteri' })}
-                                    className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
-                                >
-                                    + Müşteri Ekle
-                                </button>
-                            </div>
-                        </div>
-                    </>
-                );
+
 
             case 'video':
                 return (
@@ -2971,13 +2658,14 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                         <div>
                             <label className="block text-xs text-dark-400 mb-1">Stil</label>
                             <select
-                                value={component.data?.style || 'line'}
+                                value={component.data?.style || 'solid'}
                                 onChange={(e) => updateField('style', e.target.value)}
                                 className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
                             >
-                                <option value="line">Düz Çizgi</option>
+                                <option value="solid">Düz Çizgi</option>
                                 <option value="dashed">Kesikli</option>
                                 <option value="dotted">Noktalı</option>
+                                <option value="double">Çift Çizgi</option>
                             </select>
                         </div>
                         <div>
@@ -2988,6 +2676,18 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 onChange={(e) => updateField('color', e.target.value)}
                                 className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
                             />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Kalınlık (px)</label>
+                            <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                value={component.data?.thickness || 2}
+                                onChange={(e) => updateField('thickness', parseInt(e.target.value))}
+                                className="w-full"
+                            />
+                            <div className="text-xs text-dark-500 text-center">{component.data?.thickness || 2}px</div>
                         </div>
                     </>
                 );
@@ -3008,6 +2708,44 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                         </div>
                         <div className="text-xs text-dark-500">
                             Bölümler arasında boşluk eklemek için kullanın.
+                        </div>
+                    </>
+                );
+
+            case 'columns':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Sütun Sayısı</label>
+                            <select
+                                value={component.data?.count || 2}
+                                onChange={(e) => updateField('count', parseInt(e.target.value))}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value={2}>2 Sütun</option>
+                                <option value={3}>3 Sütun</option>
+                                <option value={4}>4 Sütun</option>
+                                <option value={5}>5 Sütun</option>
+                                <option value={6}>6 Sütun</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Sütun Arası Boşluk</label>
+                            <select
+                                value={component.data?.gap || 'normal'}
+                                onChange={(e) => updateField('gap', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value="none">Yok</option>
+                                <option value="small">Küçük (8px)</option>
+                                <option value="normal">Normal (16px)</option>
+                                <option value="large">Büyük (32px)</option>
+                            </select>
+                        </div>
+                        <div className="p-3 bg-dark-800/50 rounded-lg">
+                            <p className="text-xs text-dark-400">
+                                📌 Grid düzeni ile içerikleri düzenleyebilirsiniz.
+                            </p>
                         </div>
                     </>
                 );
@@ -3989,6 +3727,542 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                     </>
                 );
 
+            // ═══════════════════════════════════════════════════════════════
+            // SECTIONS - CTA, Banner, Features, Portfolio
+            // ═══════════════════════════════════════════════════════════════
+            case 'cta':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
+                            <input
+                                type="text"
+                                value={component.data?.title || ''}
+                                onChange={(e) => updateField('title', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Harekete Geçin!"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#3b82f6'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Alt Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.subtitle || ''}
+                                onChange={(e) => updateField('subtitle', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Hemen başlamak için tıklayın"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
+                            <input
+                                type="text"
+                                value={component.data?.buttonText || ''}
+                                onChange={(e) => updateField('buttonText', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Şimdi Başla"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Buton Linki</label>
+                            <input
+                                type="text"
+                                value={component.data?.buttonLink || ''}
+                                onChange={(e) => updateField('buttonLink', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="https://..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Metin Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.textColor || '#ffffff'}
+                                onChange={(e) => updateField('textColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                    </>
+                );
+
+            case 'banner':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Banner Metni</label>
+                            <input
+                                type="text"
+                                value={component.data?.text || ''}
+                                onChange={(e) => updateField('text', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Önemli duyuru metni..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Link Metni</label>
+                            <input
+                                type="text"
+                                value={component.data?.linkText || ''}
+                                onChange={(e) => updateField('linkText', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Daha fazla bilgi"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Link URL</label>
+                            <input
+                                type="text"
+                                value={component.data?.linkUrl || ''}
+                                onChange={(e) => updateField('linkUrl', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="https://..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Banner Tipi</label>
+                            <select
+                                value={component.data?.type || 'info'}
+                                onChange={(e) => updateField('type', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value="info">Bilgi (Mavi)</option>
+                                <option value="success">Başarı (Yeşil)</option>
+                                <option value="warning">Uyarı (Sarı)</option>
+                                <option value="error">Hata (Kırmızı)</option>
+                                <option value="promo">Promosyon (Mor)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={component.data?.dismissible || false}
+                                    onChange={(e) => updateField('dismissible', e.target.checked)}
+                                    className="rounded border-dark-600"
+                                />
+                                Kapatılabilir (Metni Gizle)
+                            </label>
+                        </div>
+                    </>
+                );
+
+            case 'about':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
+                            <input
+                                type="text"
+                                value={component.data?.sectionTitle || ''}
+                                onChange={(e) => updateField('sectionTitle', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Biz Kimiz?"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Başlık Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.titleColor || '#1f2937'}
+                                onChange={(e) => updateField('titleColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">İçerik Metni</label>
+                            <textarea
+                                value={component.data?.content || ''}
+                                onChange={(e) => updateField('content', e.target.value)}
+                                rows={4}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500 resize-none"
+                                placeholder="Şirketiniz hakkında bilgi..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Resim URL</label>
+                            <input
+                                type="text"
+                                value={component.data?.image || ''}
+                                onChange={(e) => updateField('image', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="https://..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#ffffff'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={component.data?.showTitle !== false}
+                                    onChange={(e) => updateField('showTitle', e.target.checked)}
+                                    className="rounded border-dark-600"
+                                />
+                                Başlığı Göster
+                            </label>
+                        </div>
+                    </>
+                );
+
+            case 'stats':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
+                            <input
+                                type="text"
+                                value={component.data?.sectionTitle || ''}
+                                onChange={(e) => updateField('sectionTitle', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Rakamlarla Biz"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#1e40af'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Metin Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.textColor || '#ffffff'}
+                                onChange={(e) => updateField('textColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-2">İstatistikler</label>
+                            {(component.data?.stats || []).map((stat, index) => (
+                                <div key={index} className="mb-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs text-dark-400">İstatistik {index + 1}</span>
+                                        <button
+                                            onClick={() => removeArrayItem('stats', index)}
+                                            className="text-red-400 hover:text-red-300 text-xs"
+                                        >
+                                            Sil
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={stat.value || ''}
+                                        onChange={(e) => updateArrayItem('stats', index, { ...stat, value: e.target.value })}
+                                        placeholder="Değer (örn: 100+)"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={stat.label || ''}
+                                        onChange={(e) => updateArrayItem('stats', index, { ...stat, label: e.target.value })}
+                                        placeholder="Etiket (örn: Mutlu Müşteri)"
+                                        className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                </div>
+                            ))}
+                            <button
+                                onClick={() => addArrayItem('stats', { value: '', label: '' })}
+                                className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
+                            >
+                                + İstatistik Ekle
+                            </button>
+                        </div>
+                    </>
+                );
+
+            case 'timeline':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
+                            <input
+                                type="text"
+                                value={component.data?.sectionTitle || ''}
+                                onChange={(e) => updateField('sectionTitle', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Tarihçemiz"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Yıl/Tarih Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.yearColor || '#3b82f6'}
+                                onChange={(e) => updateField('yearColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Nokta/Çizgi Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.dotColor || '#3b82f6'}
+                                onChange={(e) => updateField('dotColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#f9fafb'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-2">Zaman Çizelgesi Öğeleri</label>
+                            {(component.data?.items || []).map((item, index) => (
+                                <div key={index} className="mb-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs text-dark-400">Öğe {index + 1}</span>
+                                        <button
+                                            onClick={() => removeArrayItem('items', index)}
+                                            className="text-red-400 hover:text-red-300 text-xs"
+                                        >
+                                            Sil
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={item.year || ''}
+                                        onChange={(e) => updateArrayItem('items', index, { ...item, year: e.target.value })}
+                                        placeholder="Yıl (örn: 2020)"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={item.title || ''}
+                                        onChange={(e) => updateArrayItem('items', index, { ...item, title: e.target.value })}
+                                        placeholder="Başlık"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <textarea
+                                        value={item.description || ''}
+                                        onChange={(e) => updateArrayItem('items', index, { ...item, description: e.target.value })}
+                                        placeholder="Açıklama"
+                                        rows={2}
+                                        className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white resize-none"
+                                    />
+                                </div>
+                            ))}
+                            <button
+                                onClick={() => addArrayItem('items', { year: '', title: '', description: '' })}
+                                className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
+                            >
+                                + Zaman Öğesi Ekle
+                            </button>
+                        </div>
+                    </>
+                );
+
+            case 'clients':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
+                            <input
+                                type="text"
+                                value={component.data?.sectionTitle || ''}
+                                onChange={(e) => updateField('sectionTitle', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Güvenilir İş Ortaklarımız"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Başlık Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.titleColor || '#1f2937'}
+                                onChange={(e) => updateField('titleColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Ortak/Logo Metin Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.partnerTextColor || '#6b7280'}
+                                onChange={(e) => updateField('partnerTextColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#f9fafb'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-2">Ortaklar</label>
+                            {(component.data?.partners || []).map((partner, index) => (
+                                <div key={index} className="mb-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs text-dark-400">Ortak {index + 1}</span>
+                                        <button
+                                            onClick={() => removeArrayItem('partners', index)}
+                                            className="text-red-400 hover:text-red-300 text-xs"
+                                        >
+                                            Sil
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={partner.name || ''}
+                                        onChange={(e) => updateArrayItem('partners', index, { ...partner, name: e.target.value })}
+                                        placeholder="Ortak Adı"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={partner.logo || ''}
+                                        onChange={(e) => updateArrayItem('partners', index, { ...partner, logo: e.target.value })}
+                                        placeholder="Logo URL (Boş bırakılabilir)"
+                                        className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                </div>
+                            ))}
+                            <button
+                                onClick={() => addArrayItem('partners', { name: '', logo: '' })}
+                                className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
+                            >
+                                + Ortak Ekle
+                            </button>
+                        </div>
+                    </>
+                );
+
+            case 'portfolio':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
+                            <input
+                                type="text"
+                                value={component.data?.sectionTitle || ''}
+                                onChange={(e) => updateField('sectionTitle', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Portfolyo"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Alt Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.sectionSubtitle || ''}
+                                onChange={(e) => updateField('sectionSubtitle', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="Son projelerimiz"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Grid Sütun Sayısı</label>
+                            <select
+                                value={component.data?.columns || 3}
+                                onChange={(e) => updateField('columns', parseInt(e.target.value))}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value={2}>2 Sütun</option>
+                                <option value={3}>3 Sütun</option>
+                                <option value={4}>4 Sütun</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-2">Projeler</label>
+                            {(component.data?.projects || []).map((project, index) => (
+                                <div key={index} className="mb-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs text-dark-400">Proje {index + 1}</span>
+                                        <button
+                                            onClick={() => removeArrayItem('projects', index)}
+                                            className="text-red-400 hover:text-red-300 text-xs"
+                                        >
+                                            Sil
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={project.title || ''}
+                                        onChange={(e) => updateArrayItem('projects', index, { ...project, title: e.target.value })}
+                                        placeholder="Proje Adı"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={project.category || ''}
+                                        onChange={(e) => updateArrayItem('projects', index, { ...project, category: e.target.value })}
+                                        placeholder="Kategori (örn: Web Tasarım)"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={project.image || ''}
+                                        onChange={(e) => updateArrayItem('projects', index, { ...project, image: e.target.value })}
+                                        placeholder="Resim URL"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={project.link || ''}
+                                        onChange={(e) => updateArrayItem('projects', index, { ...project, link: e.target.value })}
+                                        placeholder="Proje Linki"
+                                        className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                </div>
+                            ))}
+                            <button
+                                onClick={() => addArrayItem('projects', { title: '', category: '', image: '', link: '' })}
+                                className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
+                            >
+                                + Proje Ekle
+                            </button>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
+                            <input
+                                type="color"
+                                value={component.data?.bgColor || '#ffffff'}
+                                onChange={(e) => updateField('bgColor', e.target.value)}
+                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={component.data?.showFilter || false}
+                                    onChange={(e) => updateField('showFilter', e.target.checked)}
+                                    className="rounded border-dark-600"
+                                />
+                                Kategori Filtresi Göster
+                            </label>
+                        </div>
+                    </>
+                );
+
             default:
                 return (
                     <div className="p-3 bg-dark-800/50 rounded-lg">
@@ -3997,25 +4271,368 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                         </p>
                     </div>
                 );
+            case 'slider':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-2">Slayt Görselleri</label>
+                            {(component.data?.images || []).map((img, index) => (
+                                <div key={index} className="mb-3 p-3 bg-dark-800/50 rounded-lg border border-dark-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs text-dark-400">Slayt {index + 1}</span>
+                                        <button
+                                            onClick={() => removeArrayItem('images', index)}
+                                            className="text-red-400 hover:text-red-300 text-xs"
+                                        >
+                                            Sil
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={img.src || ''}
+                                        onChange={(e) => updateArrayItem('images', index, { ...img, src: e.target.value })}
+                                        placeholder="Görsel URL"
+                                        className="w-full px-2 py-1.5 mb-2 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={img.title || ''}
+                                        onChange={(e) => updateArrayItem('images', index, { ...img, title: e.target.value })}
+                                        placeholder="Başlık (Opsiyonel)"
+                                        className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                </div>
+                            ))}
+                            <button
+                                onClick={() => addArrayItem('images', { src: '', title: '' })}
+                                className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
+                            >
+                                + Slayt Ekle
+                            </button>
+                        </div>
+                        <div className="pt-2 border-t border-dark-700">
+                            <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={component.data?.autoplay || false}
+                                    onChange={(e) => updateField('autoplay', e.target.checked)}
+                                    className="rounded border-dark-600"
+                                />
+                                Otomatik Oynat
+                            </label>
+                        </div>
+                    </>
+                );
+
+            case 'mediatext':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.title || ''}
+                                onChange={(e) => updateField('title', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">İçerik</label>
+                            <textarea
+                                value={component.data?.content || ''}
+                                onChange={(e) => updateField('content', e.target.value)}
+                                rows={4}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500 resize-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Görsel URL</label>
+                            <input
+                                type="text"
+                                value={component.data?.image || ''}
+                                onChange={(e) => updateField('image', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Görsel Konumu</label>
+                            <div className="flex bg-dark-800 rounded-lg p-1 border border-dark-700">
+                                <button
+                                    onClick={() => updateField('imagePos', 'left')}
+                                    className={`flex-1 py-1.5 text-xs rounded transition-colors ${component.data?.imagePos !== 'right' ? 'bg-primary-600 text-white' : 'text-dark-400 hover:text-white'}`}
+                                >
+                                    Sol
+                                </button>
+                                <button
+                                    onClick={() => updateField('imagePos', 'right')}
+                                    className={`flex-1 py-1.5 text-xs rounded transition-colors ${component.data?.imagePos === 'right' ? 'bg-primary-600 text-white' : 'text-dark-400 hover:text-white'}`}
+                                >
+                                    Sağ
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                );
+
+            case 'audio':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Ses Dosyası URL</label>
+                            <input
+                                type="text"
+                                value={component.data?.url || ''}
+                                onChange={(e) => updateField('url', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                placeholder="https://..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.title || ''}
+                                onChange={(e) => updateField('title', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                    </>
+                );
+
+            // Widgets Editors
+            case 'search':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Yer Tutucu Metni</label>
+                            <input
+                                type="text"
+                                value={component.data?.placeholder || ''}
+                                onChange={(e) => updateField('placeholder', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
+                            <input
+                                type="text"
+                                value={component.data?.buttonText || ''}
+                                onChange={(e) => updateField('buttonText', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Stil</label>
+                            <select
+                                value={component.data?.style || 'minimal'}
+                                onChange={(e) => updateField('style', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value="minimal">Minimal</option>
+                                <option value="rounded">Yuvarlak</option>
+                                <option value="classic">Klasik</option>
+                            </select>
+                        </div>
+                    </>
+                );
+
+            case 'socialicons':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Stil</label>
+                            <select
+                                value={component.data?.style || 'circle'}
+                                onChange={(e) => updateField('style', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value="circle">Daire</option>
+                                <option value="square">Kare</option>
+                                <option value="minimal">Minimal</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Renk</label>
+                            <select
+                                value={component.data?.color || 'brand'}
+                                onChange={(e) => updateField('color', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value="brand">Marka Renkleri</option>
+                                <option value="custom">Özel (Siyah/Beyaz)</option>
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="block text-xs text-dark-400">İkonlar</label>
+                            {(component.data?.icons || []).map((icon, index) => (
+                                <div key={index} className="flex gap-2">
+                                    <select
+                                        value={icon.network}
+                                        onChange={(e) => updateArrayItem('icons', index, { ...icon, network: e.target.value })}
+                                        className="w-1/3 px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    >
+                                        <option value="facebook">Facebook</option>
+                                        <option value="twitter">Twitter</option>
+                                        <option value="instagram">Instagram</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        value={icon.url}
+                                        onChange={(e) => updateArrayItem('icons', index, { ...icon, url: e.target.value })}
+                                        placeholder="URL"
+                                        className="flex-1 px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                    />
+                                    <button
+                                        onClick={() => removeArrayItem('icons', index)}
+                                        className="p-1.5 text-red-400 hover:bg-dark-600 rounded"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <button
+                                onClick={() => addArrayItem('icons', { network: 'facebook', url: '#' })}
+                                className="w-full py-2 border border-dashed border-dark-600 rounded-lg text-dark-400 hover:text-white hover:border-primary-500 text-sm transition-colors"
+                            >
+                                + İkon Ekle
+                            </button>
+                        </div>
+                    </>
+                );
+
+            case 'calendar':
+                return (
+                    <div>
+                        <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                        <input
+                            type="text"
+                            value={component.data?.title || ''}
+                            onChange={(e) => updateField('title', e.target.value)}
+                            className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                        />
+                    </div>
+                );
+
+            case 'archives':
+            case 'categories':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.title || ''}
+                                onChange={(e) => updateField('title', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Görünüm</label>
+                            <select
+                                value={component.data?.style || 'list'}
+                                onChange={(e) => updateField('style', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value="list">Liste</option>
+                                <option value="badges">Etiketler</option>
+                            </select>
+                        </div>
+                    </>
+                );
+
+            case 'latestposts':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.title || ''}
+                                onChange={(e) => updateField('title', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Gösterilecek Sayı: {component.data?.count || 3}</label>
+                            <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                value={component.data?.count || 3}
+                                onChange={(e) => updateField('count', parseInt(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
+                        <div className="pt-2">
+                            <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={component.data?.showImage !== false}
+                                    onChange={(e) => updateField('showImage', e.target.checked)}
+                                    className="rounded border-dark-600"
+                                />
+                                Görselleri Göster
+                            </label>
+                        </div>
+                    </>
+                );
+
+            case 'customhtml':
+                return (
+                    <div>
+                        <label className="block text-xs text-dark-400 mb-1">HTML Kodu</label>
+                        <textarea
+                            value={component.data?.code || ''}
+                            onChange={(e) => updateField('code', e.target.value)}
+                            rows={10}
+                            className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white font-mono focus:border-primary-500 resize-y"
+                            placeholder="<div>...</div>"
+                        />
+                        <p className="text-xs text-dark-500 mt-1">Güvenlik uyarısı: Sadece güvenilir kaynaklardan kod ekleyin.</p>
+                    </div>
+                );
+
+            case 'weather':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Şehir</label>
+                            <input
+                                type="text"
+                                value={component.data?.city || ''}
+                                onChange={(e) => updateField('city', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Stil</label>
+                            <select
+                                value={component.data?.style || 'card'}
+                                onChange={(e) => updateField('style', e.target.value)}
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            >
+                                <option value="card">Kart (Görsel)</option>
+                                <option value="minimal">Minimal</option>
+                            </select>
+                        </div>
+                    </>
+                );
+
+
         }
     };
-
 
     return (
         <aside className="hidden lg:block w-80 bg-dark-900 border-l border-dark-800 overflow-y-auto flex-shrink-0">
             <div className="p-4">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-white">Özellikler</h3>
-                    <button
-                        onClick={onClose}
-                        className="p-1 text-dark-400 hover:text-white"
-                    >
+                    <button onClick={onClose} className="p-1 text-dark-400 hover:text-white">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
 
-                {/* Component Info */}
                 <div className="mb-4 p-3 bg-dark-800/50 rounded-lg">
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-6 h-6 bg-primary-500/20 rounded flex items-center justify-center">
@@ -4028,65 +4645,603 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                     <div className="text-xs text-dark-500 font-mono">{component.id}</div>
                 </div>
 
-                {/* Dynamic Fields */}
                 <div className="space-y-4">
                     {renderFields()}
                 </div>
 
-                {/* Delete Button */}
                 <div className="mt-6 pt-4 border-t border-dark-700">
                     <button
-                        onClick={() => setShowDeleteModal(true)}
-                        className="w-full py-2 text-sm text-red-400 hover:bg-red-500/10 border border-red-500/30 rounded-lg transition-colors"
+                        onClick={() => {
+                            if (window.confirm('Bu bileşeni silmek istediğinizden emin misiniz?')) {
+                                deleteComponent(component.id);
+                                onClose();
+                            }
+                        }}
+                        className="w-full py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors"
                     >
                         Bileşeni Sil
                     </button>
                 </div>
-
             </div>
-
-            {/* Delete Confirmation Modal */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4">
-                    <div
-                        className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-sm overflow-hidden animate-scale-in"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="p-5 text-center">
-                            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-bold text-white mb-2">Bileşeni Sil</h3>
-                            <p className="text-sm text-dark-400 mb-4">
-                                Bu bileşeni silmek istediğinize emin misiniz?
-                            </p>
-                        </div>
-                        <div className="p-4 border-t border-dark-700 flex gap-3">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                className="flex-1 px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white font-medium rounded-lg transition-colors"
-                            >
-                                İptal
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors"
-                            >
-                                Sil
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </aside>
     );
 };
 
+// ==========================================
+// INTERACTIVE WIDGET COMPONENTS
+// ==========================================
+
+const WidgetSearch = ({ data }) => {
+    const [query, setQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!query) return;
+        setIsSearching(true);
+        setTimeout(() => {
+            alert(`"${query}" için arama yapılıyor... (Demo)`);
+            setIsSearching(false);
+            setQuery('');
+        }, 1000);
+    };
+
+    return (
+        <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <form
+                onSubmit={handleSearch}
+                className={`relative flex items-center ${data?.style === 'rounded' ? 'rounded-full' : data?.style === 'classic' ? 'rounded-none' : 'rounded-lg'} overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-primary-500 transition-all`}
+            >
+                <Search className="w-5 h-5 text-gray-400 absolute left-3" />
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    placeholder={data?.placeholder || 'Ara...'}
+                    className="w-full py-3 pl-10 pr-4 outline-none bg-transparent text-gray-700 placeholder-gray-400"
+                />
+                <button
+                    type="submit"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    disabled={isSearching}
+                    className={`px-6 py-3 font-medium text-white transition-colors ${data?.style === 'rounded' ? 'rounded-full my-1 mr-1' : ''} bg-primary-600 hover:bg-primary-700 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2`}
+                >
+                    {isSearching ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        data?.buttonText || 'Ara'
+                    )}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+const WidgetSocial = ({ data }) => {
+    return (
+        <div className="p-4 flex gap-3 flex-wrap justify-center">
+            {(data?.icons || []).map((icon, i) => (
+                <a
+                    key={i}
+                    href={icon.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className={`flex items-center justify-center w-10 h-10 transition-all transform hover:scale-110 ${data?.style === 'circle' ? 'rounded-full' : data?.style === 'square' ? 'rounded-lg' : 'rounded-none'} ${data?.color === 'brand' ? 'bg-primary-50 text-primary-600 hover:bg-primary-600 hover:text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-800 hover:text-white'}`}
+                >
+                    {icon.network === 'facebook' && <span className="font-bold">f</span>}
+                    {icon.network === 'twitter' && <span className="font-bold">t</span>}
+                    {icon.network === 'instagram' && <span className="font-bold">ig</span>}
+                    {icon.network === 'linkedin' && <span className="font-bold">in</span>}
+                </a>
+            ))}
+        </div>
+    );
+};
+
+const WidgetCalendar = ({ data }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    // Generate real days for current month
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay(); // 0 = Sunday
+    const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Turkish (Mon=0) logic if needed, but let's stick to standard grid
+
+    return (
+        <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold text-lg text-gray-800">
+                    {data?.title || currentDate.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
+                </h3>
+                <div className="flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                    <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                    <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                </div>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                {['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'].map(d => (
+                    <div key={d} className="text-xs font-medium text-gray-400 py-1">{d}</div>
+                ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center">
+                {/* Empty cells for start of month */}
+                {Array.from({ length: adjustedFirstDay }).map((_, i) => (
+                    <div key={`empty-${i}`} className="p-2" />
+                ))}
+
+                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
+                    // Highlight today
+                    const isToday = day === new Date().getDate() &&
+                        currentDate.getMonth() === new Date().getMonth() &&
+                        currentDate.getFullYear() === new Date().getFullYear();
+
+                    const hasEvent = data?.events?.some(e => e.day === day);
+
+                    return (
+                        <div
+                            key={day}
+                            className={`text-sm py-2 rounded-lg relative cursor-default transition-colors ${isToday ? 'bg-primary-600 text-white font-bold shadow-md transform scale-105' : 'text-gray-600 hover:bg-gray-50'}`}
+                        >
+                            {day}
+                            {hasEvent && !isToday && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary-500 rounded-full"></span>}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+const WidgetList = ({ data, type }) => {
+    const isBadges = data?.style === 'badges';
+    return (
+        <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-bold text-lg text-gray-800 mb-4 border-b border-gray-100 pb-2">{data?.title}</h3>
+            <div className={isBadges ? "flex flex-wrap gap-2" : "space-y-2"}>
+                {(data?.items || []).map((item, i) => (
+                    isBadges ? (
+                        <span
+                            key={i}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={() => alert(`${item.label} (${item.count}) filtrelendi.`)}
+                            className="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-sm font-medium hover:bg-primary-50 hover:text-primary-600 cursor-pointer transition-colors border border-gray-100"
+                        >
+                            {item.label} <span className="text-gray-400 text-xs ml-1">({item.count})</span>
+                        </span>
+                    ) : (
+                        <div
+                            key={i}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={() => alert(`${item.label} arşivine gidiliyor.`)}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors"
+                        >
+                            <span className="text-gray-600 group-hover:text-primary-600 font-medium transition-colors">{item.label}</span>
+                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs group-hover:bg-primary-100 group-hover:text-primary-600 transition-colors">{item.count}</span>
+                        </div>
+                    )
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const WidgetPosts = ({ data }) => {
+    return (
+        <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <h3 className="font-bold text-lg text-gray-800 mb-4">{data?.title}</h3>
+            <div className="space-y-4">
+                {(data?.posts || []).slice(0, data?.count || 3).map((post, i) => (
+                    <div
+                        key={i}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={() => alert(`"${post.title}" yazısı açılıyor...`)}
+                        className="flex gap-4 group cursor-pointer"
+                    >
+                        {data?.showImage && (
+                            <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden relative">
+                                <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                            </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                            <div className="text-xs text-primary-600 font-medium mb-1">{post.date}</div>
+                            <h4 className="text-sm font-bold text-gray-800 leading-snug group-hover:text-primary-600 transition-colors line-clamp-2">{post.title}</h4>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const WidgetWeather = ({ data }) => {
+    const [time, setTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const isCard = data?.style === 'card';
+    const formattedTime = time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+    return isCard ? (
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-400 to-blue-600 p-8 text-white shadow-xl group">
+            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors duration-500"></div>
+            <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl group-hover:bg-purple-500/30 transition-colors duration-500"></div>
+
+            <div className="relative z-10">
+                <div className="flex justify-between items-start mb-8">
+                    <div>
+                        <h3 className="text-2xl font-bold tracking-tight">{data?.city}</h3>
+                        <p className="text-blue-100 text-sm font-medium">{formattedTime} • Parçalı Bulutlu</p>
+                    </div>
+                    <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl group-hover:bg-white/30 transition-colors">
+                        <Globe className="w-8 h-8 text-white animate-pulse" />
+                    </div>
+                </div>
+
+                <div className="flex items-end justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-6xl font-bold tracking-tighter">24°</span>
+                        <span className="text-blue-100 text-sm mt-1">Hissedilen: 26°</span>
+                    </div>
+                    <div className="space-y-1 text-right">
+                        <div className="text-sm text-blue-100">Nem: %45</div>
+                        <div className="text-sm text-blue-100">Rüzgar: 12 km/s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    ) : (
+        <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 group hover:border-blue-200 transition-colors">
+            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors">
+                <Globe className="w-6 h-6" />
+            </div>
+            <div>
+                <div className="font-bold text-gray-900">{data?.city}</div>
+                <div className="text-sm text-gray-500">24° Parçalı Bulutlu</div>
+            </div>
+            <div className="ml-auto text-2xl font-bold text-gray-900">24°</div>
+        </div>
+    );
+};
+
+
+
+
 
 // Component Preview in Canvas
 const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
+    // State for content add modal
+    const [showContentModal, setShowContentModal] = useState(false);
+    const [contentType, setContentType] = useState(null);
+    const [contentData, setContentData] = useState({});
+    const [columnIndex, setColumnIndex] = useState(null);
+
+    // State for added contents - container uses null as key, columns use index
+    const [addedContents, setAddedContents] = useState({});
+
+    // Handle opening content modal
+    const openContentModal = (type, colIndex = null) => {
+        setContentType(type);
+        setColumnIndex(colIndex);
+        setContentData({});
+        setShowContentModal(true);
+    };
+
+    // Handle saving content - ACTUALLY STORES THE CONTENT NOW
+    const saveContent = () => {
+        const key = columnIndex !== null ? `col_${columnIndex}` : 'container';
+        const newContent = {
+            id: Date.now(),
+            type: contentType,
+            data: { ...contentData }
+        };
+
+        setAddedContents(prev => ({
+            ...prev,
+            [key]: [...(prev[key] || []), newContent]
+        }));
+
+        setShowContentModal(false);
+        setContentType(null);
+        setContentData({});
+    };
+
+    // Render a single added content item
+    const renderContentItem = (item) => {
+        switch (item.type) {
+            case 'text':
+                return (
+                    <div key={item.id} className="p-4 bg-white rounded-lg shadow-sm border border-gray-100" style={{ textAlign: item.data.align || 'left' }}>
+                        <p className="text-gray-800">{item.data.content || 'Metin içeriği'}</p>
+                    </div>
+                );
+            case 'heading':
+                const HeadingTag = item.data.level || 'h2';
+                const headingSizes = { h1: 'text-3xl', h2: 'text-2xl', h3: 'text-xl', h4: 'text-lg' };
+                return (
+                    <div key={item.id} className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                        <HeadingTag className={`font-bold text-gray-900 ${headingSizes[HeadingTag]}`}>
+                            {item.data.text || 'Başlık'}
+                        </HeadingTag>
+                    </div>
+                );
+            case 'image':
+                return (
+                    <div key={item.id} className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                        <img
+                            src={item.data.src || 'https://via.placeholder.com/400x200'}
+                            alt={item.data.alt || 'Resim'}
+                            className="w-full h-auto rounded-lg"
+                        />
+                    </div>
+                );
+            case 'button':
+                const btnStyles = {
+                    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+                    secondary: 'bg-gray-600 text-white hover:bg-gray-700',
+                    outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50'
+                };
+                return (
+                    <div key={item.id} className="p-4 bg-white rounded-lg shadow-sm border border-gray-100 text-center">
+                        <a
+                            href={item.data.link || '#'}
+                            className={`inline-block px-6 py-3 rounded-lg font-medium transition-colors ${btnStyles[item.data.style] || btnStyles.primary}`}
+                        >
+                            {item.data.text || 'Buton'}
+                        </a>
+                    </div>
+                );
+            case 'list':
+                const listItems = (item.data.items || 'Öğe 1\nÖğe 2').split('\n').filter(i => i.trim());
+                const listStyles = { bullet: '•', number: '', check: '✓' };
+                return (
+                    <div key={item.id} className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                        <ul className={item.data.listStyle === 'number' ? 'list-decimal pl-6' : 'space-y-2'}>
+                            {listItems.map((li, i) => (
+                                <li key={i} className="text-gray-800">
+                                    {item.data.listStyle !== 'number' && <span className="mr-2 text-blue-500">{listStyles[item.data.listStyle] || '•'}</span>}
+                                    {li}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                );
+            case 'quote':
+                return (
+                    <div key={item.id} className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-l-4 border-blue-500">
+                        <p className="text-gray-800 italic text-lg">"{item.data.text || 'Alıntı metni'}"</p>
+                        {item.data.author && <p className="text-gray-600 mt-2 font-medium">— {item.data.author}</p>}
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    // Content modal form fields based on type
+    const renderContentForm = () => {
+        switch (contentType) {
+            case 'text':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Metin İçeriği</label>
+                            <textarea
+                                value={contentData.content || ''}
+                                onChange={(e) => setContentData({ ...contentData, content: e.target.value })}
+                                placeholder="Metninizi buraya yazın..."
+                                rows={4}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Hizalama</label>
+                            <div className="flex gap-2">
+                                {['left', 'center', 'right'].map((align) => (
+                                    <button
+                                        type="button"
+                                        key={align}
+                                        onClick={() => setContentData({ ...contentData, align })}
+                                        className={`flex-1 py-3 rounded-lg border-2 font-medium transition-all ${contentData.align === align
+                                            ? 'border-blue-500 bg-blue-500 text-white shadow-lg'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                                            }`}
+                                    >
+                                        {align === 'left' ? '⬅️ Sol' : align === 'center' ? '⬛ Orta' : '➡️ Sağ'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'heading':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Başlık Metni</label>
+                            <input
+                                type="text"
+                                value={contentData.text || ''}
+                                onChange={(e) => setContentData({ ...contentData, text: e.target.value })}
+                                placeholder="Başlık yazın..."
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-xl font-bold text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Başlık Seviyesi</label>
+                            <div className="flex gap-2">
+                                {['h1', 'h2', 'h3', 'h4'].map((level) => (
+                                    <button
+                                        type="button"
+                                        key={level}
+                                        onClick={() => setContentData({ ...contentData, level })}
+                                        className={`flex-1 py-3 rounded-lg border-2 font-bold transition-all ${contentData.level === level
+                                            ? 'border-blue-500 bg-blue-500 text-white shadow-lg'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                                            }`}
+                                    >
+                                        {level.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'image':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Resim URL</label>
+                            <input
+                                type="text"
+                                value={contentData.src || ''}
+                                onChange={(e) => setContentData({ ...contentData, src: e.target.value })}
+                                placeholder="https://example.com/image.jpg"
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                        {contentData.src && (
+                            <div className="p-4 bg-gray-100 rounded-xl border-2 border-gray-200">
+                                <p className="text-xs font-semibold text-gray-600 mb-2">📷 Önizleme:</p>
+                                <img src={contentData.src} alt="Preview" className="max-h-40 rounded-lg mx-auto shadow-md" onError={(e) => e.target.style.display = 'none'} />
+                            </div>
+                        )}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Alt Metin</label>
+                            <input
+                                type="text"
+                                value={contentData.alt || ''}
+                                onChange={(e) => setContentData({ ...contentData, alt: e.target.value })}
+                                placeholder="Resim açıklaması..."
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                    </div>
+                );
+            case 'button':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Buton Metni</label>
+                            <input
+                                type="text"
+                                value={contentData.text || ''}
+                                onChange={(e) => setContentData({ ...contentData, text: e.target.value })}
+                                placeholder="Buton metni..."
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Link</label>
+                            <input
+                                type="text"
+                                value={contentData.link || ''}
+                                onChange={(e) => setContentData({ ...contentData, link: e.target.value })}
+                                placeholder="https://..."
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Stil</label>
+                            <div className="flex gap-2">
+                                {['primary', 'secondary', 'outline'].map((style) => (
+                                    <button
+                                        type="button"
+                                        key={style}
+                                        onClick={() => setContentData({ ...contentData, style })}
+                                        className={`flex-1 py-3 rounded-lg border-2 font-medium transition-all ${contentData.style === style
+                                            ? 'border-blue-500 bg-blue-500 text-white shadow-lg'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                                            }`}
+                                    >
+                                        {style === 'primary' ? '🔵 Birincil' : style === 'secondary' ? '⚪ İkincil' : '⭕ Çerçeveli'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'list':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Liste Öğeleri (Her satır bir öğe)</label>
+                            <textarea
+                                value={contentData.items || ''}
+                                onChange={(e) => setContentData({ ...contentData, items: e.target.value })}
+                                placeholder="Öğe 1&#10;Öğe 2&#10;Öğe 3"
+                                rows={4}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Liste Stili</label>
+                            <div className="flex gap-2">
+                                {['bullet', 'number', 'check'].map((style) => (
+                                    <button
+                                        type="button"
+                                        key={style}
+                                        onClick={() => setContentData({ ...contentData, listStyle: style })}
+                                        className={`flex-1 py-3 rounded-lg border-2 font-medium transition-all ${contentData.listStyle === style
+                                            ? 'border-blue-500 bg-blue-500 text-white shadow-lg'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                                            }`}
+                                    >
+                                        {style === 'bullet' ? '• Nokta' : style === 'number' ? '1. Numara' : '✓ Onay'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'quote':
+                return (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Alıntı Metni</label>
+                            <textarea
+                                value={contentData.text || ''}
+                                onChange={(e) => setContentData({ ...contentData, text: e.target.value })}
+                                placeholder="Alıntı metnini yazın..."
+                                rows={3}
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none italic text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Yazar</label>
+                            <input
+                                type="text"
+                                value={contentData.author || ''}
+                                onChange={(e) => setContentData({ ...contentData, author: e.target.value })}
+                                placeholder="Yazar adı..."
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-gray-900 bg-white placeholder-gray-400"
+                            />
+                        </div>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    // Get content type labels
+    const getContentLabel = (type) => {
+        const labels = {
+            text: { icon: '📝', label: 'Metin Bloğu' },
+            heading: { icon: '🔤', label: 'Başlık' },
+            image: { icon: '🖼️', label: 'Resim' },
+            button: { icon: '🔘', label: 'Buton' },
+            list: { icon: '📋', label: 'Liste' },
+            quote: { icon: '💬', label: 'Alıntı' },
+        };
+        return labels[type] || { icon: '📦', label: 'İçerik' };
+    };
 
     const getPreviewContent = () => {
         switch (component.type) {
@@ -4209,63 +5364,62 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
 
             case 'cta':
                 return (
-                    <div className="py-16 px-8 text-center text-white" style={{ backgroundColor: component.data?.bgColor || '#3b82f6' }}>
+                    <div className="py-16 px-8 text-center" style={{ backgroundColor: component.data?.bgColor || '#3b82f6', color: component.data?.textColor || '#ffffff' }}>
                         <h2 className="text-3xl font-bold mb-4">{component.data?.title || 'Projenizi Hayata Geçirin'}</h2>
                         <p className="text-lg opacity-90 mb-6">{component.data?.subtitle || 'Hemen başlayın'}</p>
-                        <button className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold">
+                        <a
+                            href={component.data?.buttonLink || '#'}
+                            className="inline-block bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                        >
                             {component.data?.buttonText || 'İletişime Geçin'}
-                        </button>
+                        </a>
                     </div>
                 );
 
             case 'banner':
-                const bannerItems = component.data?.items || [
-                    { text: '🎉 Büyük Yaz İndirimi! Tüm ürünlerde %50 indirim', buttonText: 'Alışverişe Başla', link: '#shop' },
-                    { text: '🚀 Yeni koleksiyonumuz çıktı! Hemen keşfedin', buttonText: 'Keşfet', link: '#collection' },
-                    { text: '💰 İlk alışverişe özel %20 indirim kodu: HOSGELDIN', buttonText: 'Kodu Kullan', link: '#discount' }
-                ];
+                const bannerColors = {
+                    info: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                    success: 'linear-gradient(135deg, #10b981, #06b6d4)',
+                    warning: 'linear-gradient(135deg, #f59e0b, #f97316)',
+                    error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    promo: 'linear-gradient(135deg, #a855f7, #ec4899)'
+                };
+                const bannerType = component.data?.type || 'info';
                 return (
                     <div
-                        className="relative py-4 overflow-hidden"
-                        style={{ background: `linear-gradient(135deg, ${component.data?.bgColor || '#3b82f6'}, ${component.data?.bgColorEnd || '#8b5cf6'})` }}
+                        className="relative py-4 px-8 text-center text-white overflow-hidden"
+                        style={{ background: bannerColors[bannerType] }}
                     >
-                        {/* Sliding Container */}
-                        <div className="flex animate-marquee whitespace-nowrap">
-                            {[...bannerItems, ...bannerItems].map((item, i) => (
-                                <div key={i} className="inline-flex items-center gap-8 mx-12 text-white">
-                                    <span className="text-lg font-medium">{item.text}</span>
-                                    <a
-                                        href={item.link || '#'}
-                                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105"
-                                    >
-                                        {item.buttonText || 'İncele'}
-                                    </a>
-                                </div>
-                            ))}
+                        <div className="flex items-center justify-center gap-4">
+                            {!component.data?.dismissible && (
+                                <span className="text-lg font-medium">{component.data?.text || '📢 Önemli duyuru metni'}</span>
+                            )}
+                            {!component.data?.dismissible && component.data?.linkText && (
+                                <a
+                                    href={component.data?.linkUrl || '#'}
+                                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105"
+                                >
+                                    {component.data.linkText}
+                                </a>
+                            )}
+                            {component.data?.dismissible && (
+                                <button className="ml-auto text-white/80 hover:text-white">✕</button>
+                            )}
                         </div>
-                        <style>{`
-                            @keyframes marquee {
-                                0% { transform: translateX(0); }
-                                100% { transform: translateX(-50%); }
-                            }
-                            .animate-marquee {
-                                animation: marquee 20s linear infinite;
-                            }
-                            .animate-marquee:hover {
-                                animation-play-state: paused;
-                            }
-                        `}</style>
                     </div>
                 );
 
 
             case 'about':
                 return (
-                    <div className="py-16 px-8 bg-gray-50">
+                    <div className="py-16 px-8" style={{ backgroundColor: component.data?.bgColor || '#f9fafb' }}>
                         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
                             <div>
-                                <h3 className="text-sm font-semibold text-blue-600 mb-2">{component.data?.subtitle || 'Biz Kimiz?'}</h3>
-                                <h2 className="text-3xl font-bold text-gray-800 mb-4">{component.data?.title || 'Hakkımızda'}</h2>
+                                {component.data?.showTitle !== false && (
+                                    <h2 className="text-3xl font-bold mb-4" style={{ color: component.data?.titleColor || '#1f2937' }}>
+                                        {component.data?.sectionTitle || 'Biz Kimiz?'}
+                                    </h2>
+                                )}
                                 <p className="text-gray-600 leading-relaxed">{component.data?.content || 'Şirketiniz hakkında bilgi...'}</p>
                             </div>
                             {component.data?.image && (
@@ -4275,51 +5429,15 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
                     </div>
                 );
 
-            case 'features':
-                const features = component.data?.items || [];
-                return (
-                    <div className="py-16 px-8 bg-white">
-                        <div className="text-center mb-12">
-                            <h3 className="text-sm font-semibold text-blue-600 mb-2">{component.data?.subtitle || 'Özellikler'}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800">{component.data?.title || 'Özelliklerimiz'}</h2>
-                        </div>
-                        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                            {(features.length > 0 ? features : [1, 2, 3].map(i => ({ icon: '⚡', title: `Özellik ${i}`, description: 'Açıklama...' }))).map((item, i) => (
-                                <div key={i} className="p-6 bg-gray-50 rounded-xl text-center hover:shadow-lg transition-shadow">
-                                    <div className="text-3xl mb-4">{item.icon || '⚡'}</div>
-                                    <h3 className="font-semibold text-gray-800 mb-2">{item.title}</h3>
-                                    <p className="text-sm text-gray-600">{item.description}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
 
-            case 'services':
-                const services = component.data?.items || [];
-                return (
-                    <div className="py-16 px-8 bg-gray-50">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl font-bold text-gray-800">{component.data?.title || 'Hizmetlerimiz'}</h2>
-                        </div>
-                        <div className="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-                            {(services.length > 0 ? services : [1, 2, 3, 4].map(i => ({ icon: '🌐', title: `Hizmet ${i}`, description: 'Açıklama', price: '₺999' }))).map((item, i) => (
-                                <div key={i} className="p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
-                                    <div className="text-2xl mb-3">{item.icon || '🌐'}</div>
-                                    <h3 className="font-semibold text-gray-800 mb-2">{item.title}</h3>
-                                    <p className="text-sm text-gray-600 mb-3">{item.description}</p>
-                                    {item.price && <p className="text-blue-600 font-medium text-sm">{item.price}</p>}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
+
+
 
             case 'stats':
-                const stats = component.data?.items || [{ value: '500+', label: 'Müşteri' }, { value: '1000+', label: 'Proje' }, { value: '50+', label: 'Ülke' }, { value: '10+', label: 'Yıl' }];
+                const stats = component.data?.stats || [{ value: '500+', label: 'Müşteri' }, { value: '1000+', label: 'Proje' }, { value: '50+', label: 'Ülke' }, { value: '10+', label: 'Yıl' }];
                 return (
-                    <div className="py-16 px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                        <h2 className="text-3xl font-bold text-center mb-12">{component.data?.title || 'Rakamlarla Biz'}</h2>
+                    <div className="py-16 px-8" style={{ backgroundColor: component.data?.bgColor || '#1e40af', color: component.data?.textColor || '#ffffff' }}>
+                        <h2 className="text-3xl font-bold text-center mb-12">{component.data?.sectionTitle || 'Rakamlarla Biz'}</h2>
                         <div className="grid grid-cols-4 gap-8 max-w-4xl mx-auto text-center">
                             {stats.map((item, i) => (
                                 <div key={i}>
@@ -4333,14 +5451,16 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
 
             case 'timeline':
                 const timelineItems = component.data?.items || [{ year: '2020', title: 'Başlangıç', description: 'Kuruluş' }];
+                const yearColor = component.data?.yearColor || '#3b82f6';
+                const dotColor = component.data?.dotColor || '#3b82f6';
                 return (
-                    <div className="py-16 px-8 bg-white">
-                        <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">{component.data?.title || 'Tarihçemiz'}</h2>
+                    <div className="py-16 px-8" style={{ backgroundColor: component.data?.bgColor || '#ffffff' }}>
+                        <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">{component.data?.sectionTitle || 'Tarihçemiz'}</h2>
                         <div className="max-w-3xl mx-auto space-y-8">
                             {timelineItems.map((item, i) => (
                                 <div key={i} className="flex gap-6 items-start">
-                                    <div className="w-20 text-right font-bold text-blue-600">{item.year}</div>
-                                    <div className="w-4 h-4 bg-blue-600 rounded-full mt-1 flex-shrink-0" />
+                                    <div className="w-20 text-right font-bold" style={{ color: yearColor }}>{item.year}</div>
+                                    <div className="w-4 h-4 rounded-full mt-1 flex-shrink-0" style={{ backgroundColor: dotColor }} />
                                     <div>
                                         <h3 className="font-semibold text-gray-800">{item.title}</h3>
                                         <p className="text-sm text-gray-600">{item.description}</p>
@@ -4354,7 +5474,7 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
             case 'faq':
                 const faqs = component.data?.items || [{ question: 'Soru 1?', answer: 'Cevap 1' }];
                 return (
-                    <div className="py-16 px-8 bg-gray-50">
+                    <div className="py-16 px-8" style={{ backgroundColor: component.data?.bgColor || '#f9fafb' }}>
                         <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">{component.data?.title || 'SSS'}</h2>
                         <div className="max-w-2xl mx-auto space-y-4">
                             {faqs.map((item, i) => (
@@ -4398,7 +5518,7 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
                                         {item.image && <img src={item.image} alt={item.name} className="w-10 h-10 rounded-full" />}
                                         <div>
                                             <div className="font-semibold text-gray-800">{item.name}</div>
-                                            {item.company && <div className="text-sm text-gray-500">{item.company}</div>}
+                                            {/* Company removed */}
                                         </div>
                                     </div>
                                 </div>
@@ -4408,12 +5528,27 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
                 );
 
             case 'clients':
+                const partners = component.data?.partners || [
+                    { name: 'Google' },
+                    { name: 'Microsoft' },
+                    { name: 'Amazon' },
+                    { name: 'Apple' },
+                    { name: 'Meta' }
+                ];
                 return (
-                    <div className="py-12 px-8 bg-gray-100">
-                        <h2 className="text-xl font-semibold text-center text-gray-600 mb-8">{component.data?.title || 'İş Ortaklarımız'}</h2>
-                        <div className="flex justify-center gap-12 opacity-60">
-                            {['Google', 'Microsoft', 'Amazon', 'Apple', 'Meta'].map((name, i) => (
-                                <div key={i} className="text-xl font-bold text-gray-400">{name}</div>
+                    <div className="py-12 px-8" style={{ backgroundColor: component.data?.bgColor || '#f9fafb' }}>
+                        <h2 className="text-xl font-semibold text-center mb-8" style={{ color: component.data?.titleColor || '#1f2937' }}>
+                            {component.data?.sectionTitle || 'Güvenilir İş Ortaklarımız'}
+                        </h2>
+                        <div className="flex justify-center gap-12">
+                            {partners.map((partner, i) => (
+                                <div key={i} style={{ color: component.data?.partnerTextColor || '#6b7280' }}>
+                                    {partner.logo ? (
+                                        <img src={partner.logo} alt={partner.name} className="h-12 object-contain" />
+                                    ) : (
+                                        <div className="text-xl font-bold opacity-60">{partner.name}</div>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -4671,10 +5806,185 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
 
 
             case 'divider':
-                return <hr className="border-gray-200 my-4" style={{ borderColor: component.data?.color }} />;
+                const dividerStyle = component.data?.style || 'solid';
+                const dividerColor = component.data?.color || '#e5e7eb';
+                const dividerThickness = component.data?.thickness || 2;
+                return (
+                    <div className="py-4 px-8">
+                        <hr
+                            style={{
+                                borderStyle: dividerStyle === 'line' ? 'solid' : dividerStyle,
+                                borderColor: dividerColor,
+                                borderWidth: `${dividerThickness}px 0 0 0`,
+                                margin: 0
+                            }}
+                        />
+                    </div>
+                );
 
             case 'spacer':
-                return <div style={{ height: component.data?.height || 60 }} />;
+                return <div style={{ height: component.data?.height || 60 }} className="bg-transparent" />;
+
+            case 'container':
+                const containerMaxWidth = {
+                    narrow: '800px',
+                    container: '1200px',
+                    full: '100%'
+                }[component.data?.maxWidth || 'container'];
+                const containerPadding = {
+                    none: '0',
+                    small: '1rem',
+                    normal: '2rem',
+                    large: '4rem'
+                }[component.data?.padding || 'normal'];
+                const containerContents = addedContents['container'] || [];
+                return (
+                    <div
+                        className="mx-auto"
+                        style={{
+                            maxWidth: containerMaxWidth,
+                            padding: containerPadding,
+                            backgroundColor: component.data?.bgColor || '#ffffff'
+                        }}
+                    >
+                        <div className="group relative border-2 border-dashed border-blue-300 rounded-xl p-6 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 min-h-[120px] transition-all duration-300 hover:border-blue-400 hover:shadow-lg">
+                            {/* Header Badge */}
+                            <div className="absolute -top-3 left-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                                📦 Container ({containerContents.length} içerik)
+                            </div>
+
+                            {/* Added Content Display */}
+                            {containerContents.length > 0 && (
+                                <div className="space-y-3 mb-4">
+                                    {containerContents.map(item => renderContentItem(item))}
+                                </div>
+                            )}
+
+                            {/* Add Content Button */}
+                            <div className="relative flex justify-center">
+                                <button
+                                    className="group/btn flex items-center gap-2 bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-400 text-blue-600 px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        const dropdown = e.currentTarget.nextElementSibling;
+                                        dropdown.classList.toggle('hidden');
+                                    }}
+                                >
+                                    <span className="w-5 h-5 bg-blue-500 text-white rounded-lg flex items-center justify-center text-sm font-bold group-hover/btn:bg-blue-600 transition-colors">+</span>
+                                    <span className="text-sm">İçerik Ekle</span>
+                                </button>
+
+                                {/* Dropdown Menu */}
+                                <div className="hidden absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 p-2 z-50">
+                                    <div className="text-[10px] text-gray-400 px-3 py-1.5 font-medium uppercase tracking-wider">Eklenecek İçerik</div>
+                                    {[
+                                        { icon: '📝', label: 'Metin', type: 'text' },
+                                        { icon: '🔤', label: 'Başlık', type: 'heading' },
+                                        { icon: '🖼️', label: 'Resim', type: 'image' },
+                                        { icon: '🔘', label: 'Buton', type: 'button' },
+                                        { icon: '📋', label: 'Liste', type: 'list' },
+                                        { icon: '💬', label: 'Alıntı', type: 'quote' },
+                                    ].map((item, idx) => (
+                                        <button
+                                            key={idx}
+                                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition-all text-left text-sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden');
+                                                openContentModal(item.type, null);
+                                            }}
+                                        >
+                                            <span className="text-lg">{item.icon}</span>
+                                            <span className="font-medium">{item.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+
+            case 'columns':
+                const columnCount = component.data?.count || 2;
+                const columnGap = {
+                    none: '0',
+                    small: '0.5rem',
+                    normal: '1rem',
+                    large: '2rem'
+                }[component.data?.gap || 'normal'];
+                return (
+                    <div
+                        className="py-6 px-6"
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+                            gap: columnGap
+                        }}
+                    >
+                        {Array.from({ length: columnCount }, (_, i) => {
+                            const colContents = addedContents[`col_${i}`] || [];
+                            return (
+                                <div key={i} className="group relative border-2 border-dashed border-purple-300 rounded-xl p-4 bg-gradient-to-br from-purple-50/50 to-pink-50/50 min-h-[100px] transition-all duration-300 hover:border-purple-400 hover:shadow-lg">
+                                    {/* Column Badge */}
+                                    <div className="absolute -top-2.5 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                                        Sütun {i + 1} ({colContents.length})
+                                    </div>
+
+                                    {/* Added Content Display */}
+                                    {colContents.length > 0 && (
+                                        <div className="space-y-2 mb-3 mt-2">
+                                            {colContents.map(item => renderContentItem(item))}
+                                        </div>
+                                    )}
+
+                                    {/* Add Content Button */}
+                                    <div className="relative flex justify-center">
+                                        <button
+                                            className="group/btn flex items-center gap-1.5 bg-white hover:bg-purple-50 border-2 border-purple-200 hover:border-purple-400 text-purple-600 px-3 py-2 rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-300 text-xs"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const dropdown = e.currentTarget.nextElementSibling;
+                                                document.querySelectorAll('.column-dropdown').forEach(el => {
+                                                    if (el !== dropdown) el.classList.add('hidden');
+                                                });
+                                                dropdown.classList.toggle('hidden');
+                                            }}
+                                        >
+                                            <span className="w-4 h-4 bg-purple-500 text-white rounded flex items-center justify-center text-xs font-bold">+</span>
+                                            <span>Ekle</span>
+                                        </button>
+
+                                        {/* Dropdown Menu */}
+                                        <div className="column-dropdown hidden absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 bg-white rounded-xl shadow-2xl border border-gray-100 p-1.5 z-50">
+                                            <div className="text-[9px] text-gray-400 px-2 py-1 font-medium uppercase tracking-wider">İçerik Seç</div>
+                                            {[
+                                                { icon: '📝', label: 'Metin', type: 'text' },
+                                                { icon: '🔤', label: 'Başlık', type: 'heading' },
+                                                { icon: '🖼️', label: 'Resim', type: 'image' },
+                                                { icon: '🔘', label: 'Buton', type: 'button' },
+                                                { icon: '📋', label: 'Liste', type: 'list' },
+                                                { icon: '💬', label: 'Alıntı', type: 'quote' },
+                                            ].map((item, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-purple-50 text-gray-700 hover:text-purple-600 transition-all text-left text-xs"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.currentTarget.closest('.relative').querySelector('.column-dropdown').classList.add('hidden');
+                                                        openContentModal(item.type, i);
+                                                    }}
+                                                >
+                                                    <span className="text-sm">{item.icon}</span>
+                                                    <span className="font-medium">{item.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                );
 
             case 'text':
                 return (
@@ -4804,13 +6114,140 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
 
 
             case 'slider':
+                const [slideIndex, setSlideIndex] = useState(0);
+                const slides = component.data?.images || [];
+
+                // Add autoplay support using useEffect if needed, or simple buttons
+
                 return (
-                    <div className="relative h-96 bg-gray-900 overflow-hidden">
-                        <div className="absolute inset-0 flex items-center justify-center text-white text-4xl font-bold">
-                            Slider / Carousel
+                    <div className="relative h-[500px] overflow-hidden group bg-gray-900">
+                        {slides.length > 0 ? (
+                            <>
+                                <div
+                                    className="absolute inset-0 transition-transform duration-500 ease-out flex"
+                                    style={{ transform: `translateX(-${slideIndex * 100}%)` }}
+                                >
+                                    {slides.map((slide, idx) => (
+                                        <div key={idx} className="w-full h-full flex-shrink-0 relative">
+                                            <img src={slide.src} alt={slide.title} className="w-full h-full object-cover" />
+                                            {slide.title && (
+                                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                    <h3 className="text-4xl font-bold text-white tracking-tight">{slide.title}</h3>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setSlideIndex(prev => (prev === 0 ? slides.length - 1 : prev - 1)); }}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md p-3 rounded-full text-white transition-all opacity-0 group-hover:opacity-100"
+                                >
+                                    ←
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setSlideIndex(prev => (prev === slides.length - 1 ? 0 : prev + 1)); }}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md p-3 rounded-full text-white transition-all opacity-0 group-hover:opacity-100"
+                                >
+                                    →
+                                </button>
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                                    {slides.map((_, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={(e) => { e.stopPropagation(); setSlideIndex(idx); }}
+                                            className={`w-2 h-2 rounded-full transition-all ${slideIndex === idx ? 'bg-white w-6' : 'bg-white/50'}`}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-gray-500">
+                                Slayt görseli ekleyin
+                            </div>
+                        )}
+                    </div>
+                );
+
+            case 'mediatext':
+                const isRight = component.data?.imagePos === 'right';
+                return (
+                    <div className="py-16 px-8 bg-white overflow-hidden">
+                        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+                            <div className={`flex-1 ${isRight ? 'md:order-2' : ''}`}>
+                                <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
+                                    <img
+                                        src={component.data?.image || 'https://via.placeholder.com/800x600'}
+                                        alt="Media"
+                                        className="w-full h-auto transform transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl"></div>
+                                </div>
+                            </div>
+                            <div className="flex-1 space-y-6">
+                                <h2 className="text-4xl font-bold text-gray-900 leading-tight">
+                                    {component.data?.title || 'Etkileyici Başlık Alanı'}
+                                </h2>
+                                <p className="text-lg text-gray-600 leading-relaxed">
+                                    {component.data?.content || 'Buraya görselinizle ilgili açıklayıcı metin gelecek. Kullanıcıları etkilemek için burayı en iyi şekilde kullanın.'}
+                                </p>
+                                <button className="px-8 py-3 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition-colors">
+                                    Devamını Oku
+                                </button>
+                            </div>
                         </div>
                     </div>
                 );
+
+            case 'audio':
+                return (
+                    <div className="py-8 px-8 bg-gray-50">
+                        <div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg border border-gray-100 flex items-center gap-6">
+                            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 text-indigo-600">
+                                <Music className="w-8 h-8" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-gray-900 truncate mb-2">{component.data?.title || 'Ses Dosyası'}</h3>
+                                <audio
+                                    controls
+                                    src={component.data?.url}
+                                    className="w-full h-10 accent-indigo-600"
+                                >
+                                    Tarayıcınız ses elementini desteklemiyor.
+                                </audio>
+                            </div>
+                        </div>
+                    </div>
+                );
+
+            case 'search':
+                return <WidgetSearch data={component.data} />;
+
+            case 'socialicons':
+                return <WidgetSocial data={component.data} />;
+
+            case 'calendar':
+                return <WidgetCalendar data={component.data} />;
+
+            case 'archives':
+            case 'categories':
+                return <WidgetList data={component.data} />;
+
+            case 'latestposts':
+                return <WidgetPosts data={component.data} />;
+
+            case 'customhtml':
+                return (
+                    <div className="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                        <div className="text-xs font-mono text-gray-400 mb-2 uppercase tracking-wider">HTML Önizleme</div>
+                        <div
+                            dangerouslySetInnerHTML={{ __html: component.data?.code }}
+                            className="prose prose-sm max-w-none"
+                        />
+                    </div>
+                );
+
+            case 'weather':
+                return <WidgetWeather data={component.data} />;
 
             default:
                 return (
@@ -4825,6 +6262,7 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
 
     return (
         <div
+            id={component.id}
             className={`component-wrapper relative ${isSelected ? 'selected' : ''}`}
             onClick={(e) => {
                 e.stopPropagation();
@@ -4845,8 +6283,59 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
                     <X className="w-3 h-3" />
                 </button>
             </div>
+
+            {/* Content Add Modal */}
+            {showContentModal && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowContentModal(false);
+                    }}
+                >
+                    <div
+                        className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-in"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">{getContentLabel(contentType).icon}</span>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white">{getContentLabel(contentType).label} Ekle</h3>
+                                    <p className="text-blue-100 text-sm">
+                                        {columnIndex !== null ? `Sütun ${columnIndex + 1}'e ekle` : 'Container içine ekle'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-6">
+                            {renderContentForm()}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
+                            <button
+                                onClick={() => setShowContentModal(false)}
+                                className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
+                            >
+                                İptal
+                            </button>
+                            <button
+                                onClick={saveContent}
+                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl"
+                            >
+                                ✓ Ekle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default Builder;
+
