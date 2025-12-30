@@ -47,7 +47,14 @@ const Dashboard = () => {
             toast.success('Proje oluşturuldu');
             navigate(`/builder/${project.id}`);
         } catch (error) {
-            toast.error(error.message || 'Proje başlatılamadı');
+            console.error('Project creation failed:', error);
+            // Show detailed error if available
+            if (error.response) {
+                toast.error(`Hata: ${error.response.status} - ${error.response.data?.message || error.message}`);
+                console.log('Error URL:', error.response.config.url);
+            } else {
+                toast.error(error.message || 'Proje başlatılamadı');
+            }
         } finally {
             setShowNewProject(false);
             setNewProjectName('');
