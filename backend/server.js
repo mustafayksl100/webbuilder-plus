@@ -166,7 +166,9 @@ app.use((err, req, res, next) => {
 // Server Start
 // ============================================
 
-app.listen(PORT, () => {
+const { initializeDatabaseTables } = require('./config/initDatabase');
+
+app.listen(PORT, async () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
@@ -177,16 +179,27 @@ app.listen(PORT, () => {
 ║                                                               ║
 ╠═══════════════════════════════════════════════════════════════╣
 ║                                                               ║
-║   API Endpoints:                                              ║
-║   ├── GET  /api/health          - Health check               ║
-║   ├── POST /api/auth/register   - User registration          ║
-║   ├── POST /api/auth/login      - User login                 ║
-║   ├── GET  /api/projects        - List projects              ║
-║   ├── GET  /api/credits/balance - Check credit balance       ║
-║   └── POST /api/export/:id      - Export project             ║
+║   📚 API Documentation: http://localhost:${PORT}/api-docs        ║
+║   🏥 Health Check: http://localhost:${PORT}/health              ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
-  `);
+    `);
+
+    // Initialize database tables
+    await initializeDatabaseTables();
+
+    console.log('\n✨ Server is ready to accept requests!\n');
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('👋 SIGTERM received. Closing server gracefully...');
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('👋 SIGINT received. Closing server gracefully...');
+    process.exit(0);
 });
 
 module.exports = app;
