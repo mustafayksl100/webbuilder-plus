@@ -49,28 +49,7 @@ export const useAuthStore = create(
 
                     return response.data;
                 } catch (error) {
-                    console.warn("Backend Login Failed, Activating Demo Mode Bypass");
-
-                    // DEMO MODE MOCK USER
-                    const mockUser = {
-                        id: 'demo-user-1',
-                        email: email,
-                        fullName: 'Demo Kullanıcı',
-                        credits: 1000,
-                        role: 'user',
-                        avatarUrl: null
-                    };
-                    const mockToken = 'demo-token-12345';
-
-                    set({
-                        user: mockUser,
-                        token: mockToken,
-                        isAuthenticated: true,
-                        isLoading: false
-                    });
-
-                    // Return mock success response
-                    return { success: true, data: { user: mockUser, token: mockToken } };
+                    throw error;
                 }
             },
 
@@ -93,27 +72,7 @@ export const useAuthStore = create(
 
                     return response.data;
                 } catch (error) {
-                    console.warn("Backend Register Failed, Activating Demo Mode Bypass");
-
-                    // DEMO MODE MOCK USER - REGISTER
-                    const mockUser = {
-                        id: 'demo-user-new',
-                        email: email,
-                        fullName: fullName,
-                        credits: 500, // Hoşgeldin bonusu
-                        role: 'user',
-                        avatarUrl: null
-                    };
-                    const mockToken = 'demo-token-new';
-
-                    set({
-                        user: mockUser,
-                        token: mockToken,
-                        isAuthenticated: true,
-                        isLoading: false
-                    });
-
-                    return { success: true, data: { user: mockUser, token: mockToken } };
+                    throw error;
                 }
             },
 
