@@ -1,9 +1,14 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
+// API Base URL - Production uses Render, Development uses Vite proxy
+const API_BASE_URL = import.meta.env.PROD
+    ? 'https://webbuilder-plus.onrender.com/api'
+    : '/api';
+
 // Create axios instance
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
