@@ -17,23 +17,20 @@ async function initializeDatabaseTables() {
 
         const tablesExist = checkTable.rows[0].exists;
 
-        if (!tablesExist) {
-            console.log('📦 Tables not found. Creating schema...');
+        // Execute schema regardless of whether users table exists (Schema is now idempotent)
+        console.log('🔄 Verifying/Creating database schema...');
 
-            // Read schema file
-            const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
+        // Read schema file
+        const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
 
-            if (fs.existsSync(schemaPath)) {
-                const schema = fs.readFileSync(schemaPath, 'utf8');
+        if (fs.existsSync(schemaPath)) {
+            const schema = fs.readFileSync(schemaPath, 'utf8');
 
-                // Execute schema
-                await pool.query(schema);
-                console.log('✅ Database schema created successfully!');
-            } else {
-                console.warn('⚠️ schema.sql not found at:', schemaPath);
-            }
+            // Execute schema
+            await pool.query(schema);
+            console.log('✅ Database schema verified/updated successfully!');
         } else {
-            console.log('✅ Database tables already exist.');
+            console.warn('⚠️ schema.sql not found at:', schemaPath);
         }
 
         // Verify tables
