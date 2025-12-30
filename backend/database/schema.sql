@@ -3,6 +3,8 @@
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable pgcrypto for password hashing
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ============================================
 -- USERS TABLE
@@ -170,6 +172,13 @@ CREATE INDEX IF NOT EXISTS idx_exports_project_id ON exports(project_id);
 CREATE INDEX IF NOT EXISTS idx_media_user_id ON media(user_id);
 CREATE INDEX IF NOT EXISTS idx_templates_type ON templates(type);
 CREATE INDEX IF NOT EXISTS idx_components_type ON components(type);
+
+-- ============================================
+-- INITIAL DATA: Seed User (mustafa@gmail.com)
+-- ============================================
+INSERT INTO users (email, password_hash, full_name, credits, role, is_verified) 
+SELECT 'mustafa@gmail.com', '$2a$10$wdhqDxzf4H.g0OUZ8QQyPfTgeqasIeOO/FqDsCocQW.HG9HP', 'Mustafa Yüksel', 1000, 'user', TRUE
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'mustafa@gmail.com');
 
 -- ============================================
 -- INITIAL DATA: Credit Packages
