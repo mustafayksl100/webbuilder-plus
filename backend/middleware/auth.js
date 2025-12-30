@@ -1,6 +1,13 @@
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
 
+// Use fallback secret if env var is missing (prevents crash and ensures consistency)
+const JWT_SECRET = process.env.JWT_SECRET || 'webbuilder-fallback-secret-key-2024';
+
+if (!process.env.JWT_SECRET) {
+    console.warn('⚠️ WARNING: JWT_SECRET not found in environment variables, using fallback.');
+}
+
 // Verify JWT Token
 const authenticateToken = async (req, res, next) => {
     try {
@@ -14,7 +21,7 @@ const authenticateToken = async (req, res, next) => {
             });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET);
 
         // Get user from database
         const result = await query(
@@ -39,9 +46,10 @@ const authenticateToken = async (req, res, next) => {
             });
         }
         if (error.name === 'JsonWebTokenError') {
+            // Enhanced error message for debugging
             return res.status(403).json({
                 success: false,
-                message: 'Geçersiz token'
+                message: `Geçersiz token: ${error.message}`
             });
         }
         console.error('Auth error:', error);
@@ -84,7 +92,7 @@ const hasCredits = (requiredCredits) => {
 const generateToken = (userId) => {
     return jwt.sign(
         { userId },
-        process.env.JWT_SECRET,
+        JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 };

@@ -32,8 +32,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Handle 401 Unauthorized
-        if (error.response?.status === 401) {
+        // Handle 401 Unauthorized and 403 Forbidden
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            console.log('Session expired or invalid, logging out...');
             useAuthStore.getState().logout();
             window.location.href = '/login';
         }
