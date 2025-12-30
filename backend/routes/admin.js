@@ -70,4 +70,39 @@ router.get('/list-users', async (req, res) => {
     }
 });
 
+/**
+ * Reset password for mustafa@gmail.com
+ * Access: GET /api/admin/reset-password
+ */
+router.get('/reset-password', async (req, res) => {
+    try {
+        const bcrypt = require('bcryptjs');
+        const newHash = await bcrypt.hash('mustafa159', 10);
+
+        const result = await query(
+            'UPDATE users SET password_hash = $1 WHERE email = $2 RETURNING id, email',
+            [newHash, 'mustafa@gmail.com']
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Kullanıcı bulunamadı'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Şifre "mustafa159" olarak sıfırlandı!',
+            user: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Hata: ' + error.message
+        });
+    }
+});
+
 module.exports = router;
