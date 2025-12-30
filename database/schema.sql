@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
-    avatar_url VARCHAR(500),
+    avatar_url TEXT,
     credits INTEGER DEFAULT 500,
     role VARCHAR(20) DEFAULT 'user',
     is_verified BOOLEAN DEFAULT FALSE,
@@ -214,3 +214,6 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Fix avatar_url length for base64 images
+ALTER TABLE users ALTER COLUMN avatar_url TYPE TEXT;

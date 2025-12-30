@@ -99,7 +99,7 @@ const Dashboard = () => {
             {/* Top Bar / Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-slate-800 pb-6">
                 <div>
-                    <div className="flex items-center gap-2 text-cyan-400 mb-2">
+                    <div className="flex items-center gap-2 text-emerald-400 mb-2">
                         <Terminal className="w-4 h-4" />
                         <span className="text-xs font-mono uppercase tracking-widest">Aktif Oturum</span>
                     </div>
@@ -110,8 +110,8 @@ const Dashboard = () => {
 
                 <div className="flex items-center gap-3">
                     <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                        <div className="p-1.5 bg-cyan-500/10 rounded-lg">
-                            <Zap className="w-4 h-4 text-cyan-400" />
+                        <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                            <Zap className="w-4 h-4 text-emerald-400" />
                         </div>
                         <div>
                             <div className="text-[10px] text-slate-500 font-mono uppercase">Kredi</div>
@@ -121,7 +121,8 @@ const Dashboard = () => {
 
                     <button
                         onClick={() => setShowNewProject(true)}
-                        className="px-5 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm rounded-xl transition-all hover:shadow-[0_0_16px_rgba(6,182,212,0.3)] flex items-center gap-2"
+                        className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-sm rounded-xl transition-all hover:shadow-[0_0_16px_rgba(16,185,129,0.25)] flex items-center gap-2"
+                        style={{ fontFamily: 'Sora, system-ui, sans-serif' }}
                     >
                         <Plus className="w-4 h-4" strokeWidth={2.5} />
                         <span>Yeni Proje</span>
@@ -146,13 +147,14 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                 <h2 className="text-xl font-bold font-[Sora]">Aktif Projeler</h2>
                 <div className="relative w-full sm:w-auto group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
                     <input
                         type="text"
                         placeholder="Proje ara..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full sm:w-80 pl-10 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:outline-none transition-all placeholder-slate-600"
+                        className="w-full sm:w-80 pl-10 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all placeholder-slate-600"
+                        style={{ fontFamily: 'Manrope, system-ui, sans-serif' }}
                     />
                 </div>
             </div>
@@ -186,15 +188,15 @@ const Dashboard = () => {
                     {filteredProjects.map((project) => (
                         <div
                             key={project.id}
-                            className="group bg-slate-900 border border-slate-800 rounded-2xl p-1 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-900/10 flex flex-col h-full"
+                            className="group bg-slate-900 border border-slate-800 rounded-2xl p-1 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-900/10 flex flex-col h-full"
                         >
                             <div className="bg-slate-950 rounded-xl p-6 flex-1 relative overflow-hidden">
                                 {/* Decorative Tech Lines */}
                                 <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-slate-800/20 to-transparent rounded-bl-3xl" />
 
                                 <div className="flex justify-between items-start mb-6">
-                                    <div className="w-12 h-12 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-center group-hover:border-cyan-500/30 transition-colors">
-                                        <Globe className="w-6 h-6 text-slate-400 group-hover:text-cyan-400 transition-colors" />
+                                    <div className="w-12 h-12 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-center group-hover:border-emerald-500/30 transition-colors">
+                                        <Globe className="w-6 h-6 text-slate-400 group-hover:text-emerald-400 transition-colors" />
                                     </div>
 
                                     <div className="relative">
@@ -221,7 +223,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
 
-                                <h3 className="text-xl font-bold text-white mb-2 font-[Sora] group-hover:text-cyan-400 transition-colors">
+                                <h3 className="text-xl font-bold text-white mb-2 font-[Sora] group-hover:text-emerald-400 transition-colors">
                                     {project.name}
                                 </h3>
 
@@ -241,7 +243,8 @@ const Dashboard = () => {
 
                             <Link
                                 to={`/builder/${project.id}`}
-                                className="mt-1 bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-medium text-sm"
+                                className="mt-1 bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-all font-medium text-sm"
+                                style={{ fontFamily: 'Manrope, system-ui, sans-serif' }}
                             >
                                 <Edit3 className="w-4 h-4" /> Düzenle
                             </Link>
@@ -255,7 +258,7 @@ const Dashboard = () => {
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6">
                     <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-3xl p-8 relative overflow-hidden animate-scale-in shadow-2xl">
                         {/* Modal Shine Effect */}
-                        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+                        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
 
                         {showNewProject ? (
                             <>
@@ -264,20 +267,21 @@ const Dashboard = () => {
 
                                 <div className="space-y-5">
                                     <div>
-                                        <label className="block text-xs font-mono text-cyan-400 mb-2 uppercase tracking-wider">Proje Adı</label>
+                                        <label className="block text-xs font-mono text-emerald-400 mb-2 uppercase tracking-wider">Proje Adı</label>
                                         <input
                                             autoFocus
                                             type="text"
                                             value={newProjectName}
                                             onChange={(e) => setNewProjectName(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && handleCreateProject()}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-lg"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-lg"
                                             placeholder="Örn: Şirket Web Sitesi"
+                                            style={{ fontFamily: 'Manrope, system-ui, sans-serif' }}
                                         />
                                     </div>
                                     <div className="flex gap-3">
-                                        <button onClick={() => setShowNewProject(false)} className="flex-1 py-3 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-medium transition-colors">İptal</button>
-                                        <button onClick={handleCreateProject} className="flex-1 py-3 rounded-xl bg-cyan-500 text-black hover:bg-cyan-400 font-semibold transition-colors shadow-[0_0_16px_rgba(6,182,212,0.2)]">Oluştur</button>
+                                        <button onClick={() => setShowNewProject(false)} className="flex-1 py-3 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-medium transition-colors" style={{ fontFamily: 'Manrope, system-ui, sans-serif' }}>İptal</button>
+                                        <button onClick={handleCreateProject} className="flex-1 py-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-400 font-semibold transition-colors shadow-[0_0_16px_rgba(16,185,129,0.2)]" style={{ fontFamily: 'Sora, system-ui, sans-serif' }}>Oluştur</button>
                                     </div>
                                 </div>
                             </>

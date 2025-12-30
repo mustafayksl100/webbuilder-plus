@@ -212,7 +212,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 // PUT /api/auth/profile - Update profile
 router.put('/profile', authenticateToken, [
     body('fullName').optional().trim().isLength({ min: 2 }),
-    body('avatarUrl').optional().isURL()
+    body('avatarUrl').optional()
 ], async (req, res) => {
     try {
         const { fullName, avatarUrl } = req.body;

@@ -48,8 +48,8 @@ const Layout = () => {
                 {/* Logo */}
                 <div className="h-24 flex items-center justify-between px-8 border-b border-slate-800">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                            <Boxes className="w-6 h-6 text-black" />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}>
+                            <Boxes className="w-6 h-6 text-white" />
                         </div>
                         <span className="font-bold text-xl text-white font-[Sora] tracking-tight">WebBuilder</span>
                     </div>
@@ -71,7 +71,7 @@ const Layout = () => {
                             className={({ isActive }) => `
                                 flex items-center gap-4 px-5 py-4 rounded-xl transition-all font-medium border
                                 ${isActive
-                                    ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                                     : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-900 hover:text-white'
                                 }
                             `}
@@ -88,7 +88,7 @@ const Layout = () => {
                     {/* User Info */}
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-12 h-12 bg-slate-800 border border-slate-700 rounded-xl flex items-center justify-center">
-                            <span className="text-cyan-400 font-bold font-[Sora] text-lg">
+                            <span className="text-emerald-400 font-bold font-[Sora] text-lg">
                                 {user?.fullName?.charAt(0) || 'U'}
                             </span>
                         </div>
@@ -124,8 +124,8 @@ const Layout = () => {
                         <Menu className="w-6 h-6" />
                     </button>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
-                            <Boxes className="w-5 h-5 text-black" />
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}>
+                            <Boxes className="w-5 h-5 text-white" />
                         </div>
                         <span className="font-bold text-lg text-white font-[Sora]">WebBuilder</span>
                     </div>

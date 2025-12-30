@@ -25,8 +25,8 @@ const Shop = () => {
             description: 'Web sitenizi tamamladığınızda kazanın',
             credits: 1000,
             icon: Rocket,
-            color: 'cyan',
-            gradient: 'from-cyan-500 to-blue-500',
+            color: 'emerald',
+            gradient: 'from-emerald-500 to-teal-500',
             features: [
                 '1000 kredi anında hesabınıza',
                 '5 export hakkı',
@@ -42,8 +42,8 @@ const Shop = () => {
             description: 'Test için ekstra kredi',
             credits: 1000,
             icon: TestTube,
-            color: 'purple',
-            gradient: 'from-purple-500 to-pink-500',
+            color: 'teal',
+            gradient: 'from-teal-500 to-emerald-500',
             features: [
                 '1000 test kredisi',
                 'Tüm özellikleri deneyin',
@@ -79,7 +79,7 @@ const Shop = () => {
 
             {/* Header */}
             <div className="max-w-4xl mx-auto text-center mb-12">
-                <div className="inline-flex items-center gap-2 text-cyan-400 mb-4">
+                <div className="inline-flex items-center gap-2 text-emerald-400 mb-4">
                     <Coins className="w-5 h-5" />
                     <span className="text-xs font-mono uppercase tracking-widest">Kredi Merkezi</span>
                 </div>
@@ -92,8 +92,8 @@ const Shop = () => {
 
                 {/* Current Balance Card */}
                 <div className="inline-flex items-center gap-4 px-8 py-5 bg-slate-900 border border-slate-800 rounded-2xl">
-                    <div className="p-3 bg-cyan-500/10 rounded-xl">
-                        <Zap className="w-6 h-6 text-cyan-400" />
+                    <div className="p-3 bg-emerald-500/10 rounded-xl">
+                        <Zap className="w-6 h-6 text-emerald-400" />
                     </div>
                     <div className="text-left">
                         <div className="text-xs text-slate-500 font-mono uppercase">Mevcut Bakiye</div>
@@ -199,13 +199,13 @@ const Shop = () => {
             <div className="max-w-4xl mx-auto">
                 <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8">
                     <div className="flex items-center gap-3 mb-6">
-                        <Sparkles className="w-6 h-6 text-cyan-400" />
+                        <Sparkles className="w-6 h-6 text-emerald-400" />
                         <h3 className="text-xl font-bold text-white font-[Sora]">Kredi Kullanımı</h3>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-4">
-                            <h4 className="text-cyan-400 font-semibold font-mono text-sm uppercase tracking-wide">Harcama</h4>
+                            <h4 className="text-emerald-400 font-semibold font-mono text-sm uppercase tracking-wide">Harcama</h4>
                             <ul className="space-y-3 text-slate-400">
                                 <li className="flex items-center gap-3">
                                     <ArrowRight className="w-4 h-4 text-red-400" />
@@ -219,7 +219,7 @@ const Shop = () => {
                         </div>
 
                         <div className="space-y-4">
-                            <h4 className="text-cyan-400 font-semibold font-mono text-sm uppercase tracking-wide">Kazanma</h4>
+                            <h4 className="text-emerald-400 font-semibold font-mono text-sm uppercase tracking-wide">Kazanma</h4>
                             <ul className="space-y-3 text-slate-400">
                                 <li className="flex items-center gap-3">
                                     <ArrowRight className="w-4 h-4 text-green-400" />

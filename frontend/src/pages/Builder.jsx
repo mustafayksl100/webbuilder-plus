@@ -110,7 +110,6 @@ const COMPONENT_CATEGORIES = [
     { id: 'sections', label: 'Bölümler', icon: Box, color: 'text-purple-400' },
     { id: 'content', label: 'İçerik', icon: Type, color: 'text-amber-400' },
     { id: 'media', label: 'Medya', icon: Image, color: 'text-green-400' },
-    { id: 'widgets', label: 'Widgetlar', icon: Settings, color: 'text-cyan-400' },
     { id: 'commerce', label: 'E-Ticaret', icon: ShoppingCart, color: 'text-pink-400' },
     { id: 'forms', label: 'Formlar', icon: FormInput, color: 'text-teal-400' }
 ];
@@ -154,6 +153,7 @@ const COMPONENT_TYPES = [
     { type: 'list', label: 'Liste', icon: List, category: 'content' },
     { type: 'quote', label: 'Alıntı', icon: Quote, category: 'content' },
     { type: 'code', label: 'Kod Bloğu', icon: Code, category: 'content' },
+    { type: 'search', label: 'Arama Kutusu', icon: Search, category: 'content' },
 
     // ═══════════════════════════════════════════════════════════════
     // MEDIA (10 components)
@@ -166,28 +166,25 @@ const COMPONENT_TYPES = [
     { type: 'audio', label: 'Ses Oynatıcı', icon: Music, category: 'media' },
 
     // ═══════════════════════════════════════════════════════════════
-    // WIDGETS (8 components)
+    // WIDGETS (Removed mostly, kept internal logic)
     // ═══════════════════════════════════════════════════════════════
-    { type: 'search', label: 'Arama Kutusu', icon: Search, category: 'widgets' },
-    { type: 'socialicons', label: 'Sosyal İkonlar', icon: Share2, category: 'widgets' },
-    { type: 'calendar', label: 'Takvim', icon: Calendar, category: 'widgets' },
-    { type: 'archives', label: 'Arşivler', icon: Archive, category: 'widgets' },
-    { type: 'categories', label: 'Kategoriler', icon: List, category: 'widgets' },
-    { type: 'latestposts', label: 'Son Yazılar', icon: FileText, category: 'widgets' },
-    { type: 'customhtml', label: 'Özel HTML', icon: FileCode, category: 'widgets' },
-    { type: 'weather', label: 'Hava Durumu', icon: Globe, category: 'widgets' },
+    // { type: 'socialicons', label: 'Sosyal İkonlar', icon: Share2, category: 'widgets' },
+    // { type: 'calendar', label: 'Takvim', icon: Calendar, category: 'widgets' },
+    // { type: 'archives', label: 'Arşivler', icon: Archive, category: 'widgets' },
+    // { type: 'categories', label: 'Kategoriler', icon: List, category: 'widgets' },
+    // { type: 'latestposts', label: 'Son Yazılar', icon: FileText, category: 'widgets' },
+    // { type: 'customhtml', label: 'Özel HTML', icon: FileCode, category: 'widgets' },
+    // { type: 'weather', label: 'Hava Durumu', icon: Globe, category: 'widgets' },
 
     // ═══════════════════════════════════════════════════════════════
-    // E-COMMERCE (8 components)
+    // E-COMMERCE (5 components)
     // ═══════════════════════════════════════════════════════════════
     { type: 'pricing', label: 'Fiyatlandırma', icon: Coins, category: 'commerce' },
     { type: 'products', label: 'Ürünler', icon: ShoppingBag, category: 'commerce' },
     { type: 'productcard', label: 'Ürün Kartı', icon: ShoppingCart, category: 'commerce' },
     { type: 'productgrid', label: 'Ürün Grid', icon: Grid, category: 'commerce' },
-    { type: 'cartbutton', label: 'Sepet Butonu', icon: ShoppingCart, category: 'commerce' },
     { type: 'pricedisplay', label: 'Fiyat Göster', icon: Tag, category: 'commerce' },
     { type: 'salebadge', label: 'İndirim Rozeti', icon: Percent, category: 'commerce' },
-    { type: 'countdown', label: 'Geri Sayım', icon: Clock, category: 'commerce' },
 
 
     // ═══════════════════════════════════════════════════════════════
@@ -1297,6 +1294,7 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
     };
 
     const renderFields = () => {
+        console.log('🔍 PropertyEditor - Component Type:', component.type, 'Data:', component.data);
         switch (component.type) {
             // Grid System Property Editors
             case 'container':
@@ -2593,14 +2591,60 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                             placeholder="Resim URL"
                                             className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
                                         />
+                                        <input
+                                            type="text"
+                                            value={item.link || ''}
+                                            onChange={(e) => {
+                                                const newItems = [...(component.data?.items || [])];
+                                                newItems[index] = { ...newItems[index], link: e.target.value };
+                                                updateField('items', newItems);
+                                            }}
+                                            placeholder="Ürün/Sepet Linki"
+                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                        />
                                     </div>
                                 ))}
                                 <button
-                                    onClick={() => addArrayItem('items', { name: '', price: '', image: '' })}
+                                    onClick={() => addArrayItem('items', { name: '', price: '', image: '', link: '' })}
                                     className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
                                 >
                                     + Ürün Ekle
                                 </button>
+                            </div>
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🛒 Sepet Ayarları</p>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Alt Başlık</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.subtitle || ''}
+                                        onChange={(e) => updateField('subtitle', e.target.value)}
+                                        placeholder="En popüler ürünlerimiz..."
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.buttonText || ''}
+                                        onChange={(e) => updateField('buttonText', e.target.value)}
+                                        placeholder="Sepete Ekle"
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Varsayılan Sepet Linki</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.cartLink || ''}
+                                        onChange={(e) => updateField('cartLink', e.target.value)}
+                                        placeholder="https://shop.com/cart"
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </>
@@ -3324,6 +3368,31 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 Stokta Var
                             </label>
                         </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🛒 Sepet Ayarları</p>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.buttonText || ''}
+                                        onChange={(e) => updateField('buttonText', e.target.value)}
+                                        placeholder="Sepete Ekle"
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Sepet Linki</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.cartLink || ''}
+                                        onChange={(e) => updateField('cartLink', e.target.value)}
+                                        placeholder="https://shop.com/cart?add=..."
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </>
                 );
 
@@ -3393,14 +3462,60 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                             placeholder="Resim URL"
                                             className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
                                         />
+                                        <input
+                                            type="text"
+                                            value={product.link || ''}
+                                            onChange={(e) => {
+                                                const newProducts = [...(component.data?.products || [])];
+                                                newProducts[index] = { ...newProducts[index], link: e.target.value };
+                                                updateField('products', newProducts);
+                                            }}
+                                            placeholder="Ürün/Sepet Linki"
+                                            className="w-full px-2 py-1.5 bg-dark-700 border border-dark-600 rounded text-sm text-white"
+                                        />
                                     </div>
                                 ))}
                                 <button
-                                    onClick={() => addArrayItem('products', { name: '', price: '', image: '' })}
+                                    onClick={() => addArrayItem('products', { name: '', price: '', image: '', link: '' })}
                                     className="w-full py-2 text-xs text-primary-400 hover:bg-primary-500/10 border border-dashed border-dark-600 rounded-lg"
                                 >
                                     + Ürün Ekle
                                 </button>
+                            </div>
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🛒 Sepet Ayarları</p>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Alt Başlık</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.subtitle || ''}
+                                        onChange={(e) => updateField('subtitle', e.target.value)}
+                                        placeholder="En çok satanlar..."
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.buttonText || ''}
+                                        onChange={(e) => updateField('buttonText', e.target.value)}
+                                        placeholder="Sepete Ekle"
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Varsayılan Sepet Linki</label>
+                                    <input
+                                        type="text"
+                                        value={component.data?.cartLink || ''}
+                                        onChange={(e) => updateField('cartLink', e.target.value)}
+                                        placeholder="https://shop.com/cart"
+                                        className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </>
@@ -3462,6 +3577,19 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 />
                                 Tam Genişlik
                             </label>
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🔗 Link Ayarları</p>
+                            <div>
+                                <label className="block text-xs text-dark-400 mb-1">Sepet/Ürün Linki</label>
+                                <input
+                                    type="text"
+                                    value={component.data?.link || ''}
+                                    onChange={(e) => updateField('link', e.target.value)}
+                                    placeholder="https://shop.com/cart"
+                                    className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                />
+                            </div>
                         </div>
                     </>
                 );
@@ -3659,6 +3787,77 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 Saniye Göster
                             </label>
                         </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">⏱️ Geri Sayım Kontrolü</p>
+                            <div className="space-y-3">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => {
+                                            if (!component.data?.targetDate) {
+                                                // Set target to 24 hours from now if no date set
+                                                const target = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                                                updateField('targetDate', target.toISOString());
+                                            }
+                                            updateField('isActive', true);
+                                        }}
+                                        className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${component.data?.isActive
+                                            ? 'bg-emerald-600 text-white'
+                                            : 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white'
+                                            }`}
+                                    >
+                                        ▶️ Başlat
+                                    </button>
+                                    <button
+                                        onClick={() => updateField('isActive', false)}
+                                        className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${!component.data?.isActive
+                                            ? 'bg-red-600 text-white'
+                                            : 'bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white'
+                                            }`}
+                                    >
+                                        ⏸️ Durdur
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button
+                                        onClick={() => {
+                                            const target = new Date(Date.now() + 1 * 60 * 60 * 1000);
+                                            updateField('targetDate', target.toISOString());
+                                            updateField('isActive', true);
+                                        }}
+                                        className="py-2 bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white rounded-lg text-xs transition-colors"
+                                    >
+                                        1 Saat
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const target = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                                            updateField('targetDate', target.toISOString());
+                                            updateField('isActive', true);
+                                        }}
+                                        className="py-2 bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white rounded-lg text-xs transition-colors"
+                                    >
+                                        24 Saat
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const target = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                                            updateField('targetDate', target.toISOString());
+                                            updateField('isActive', true);
+                                        }}
+                                        className="py-2 bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white rounded-lg text-xs transition-colors"
+                                    >
+                                        1 Hafta
+                                    </button>
+                                </div>
+                                {component.data?.isActive && component.data?.targetDate && (
+                                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                                        <p className="text-xs text-emerald-400">
+                                            ✓ Geri sayım aktif: {new Date(component.data.targetDate).toLocaleString('tr-TR')} tarihine kadar
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </>
                 );
 
@@ -3695,20 +3894,47 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                                 className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
                             />
                         </div>
-                        <div>
-                            <label className="block text-xs text-dark-400 mb-1">Arkaplan Rengi</label>
-                            <input
-                                type="color"
-                                value={component.data?.bgColor || '#ffffff'}
-                                onChange={(e) => updateField('bgColor', e.target.value)}
-                                className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
-                            />
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🎨 Renk Ayarları</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Arkaplan</label>
+                                    <input
+                                        type="color"
+                                        value={component.data?.bgColor || '#f8fafc'}
+                                        onChange={(e) => updateField('bgColor', e.target.value)}
+                                        className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Buton Rengi</label>
+                                    <input
+                                        type="color"
+                                        value={component.data?.buttonColor || '#4f46e5'}
+                                        onChange={(e) => updateField('buttonColor', e.target.value)}
+                                        className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🔗 Link Ayarları</p>
+                            <div>
+                                <label className="block text-xs text-dark-400 mb-1">Buton Linki (Form Action)</label>
+                                <input
+                                    type="text"
+                                    value={component.data?.buttonLink || ''}
+                                    onChange={(e) => updateField('buttonLink', e.target.value)}
+                                    placeholder="https://yoursite.com/login"
+                                    className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                />
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    checked={component.data?.showRegisterLink || false}
+                                    checked={component.data?.showRegisterLink !== false}
                                     onChange={(e) => updateField('showRegisterLink', e.target.checked)}
                                     className="rounded border-dark-600"
                                 />
@@ -3717,12 +3943,177 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
                             <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    checked={component.data?.showForgotPassword || false}
+                                    checked={component.data?.showForgotPassword !== false}
                                     onChange={(e) => updateField('showForgotPassword', e.target.checked)}
                                     className="rounded border-dark-600"
                                 />
                                 Şifremi Unuttum Bağlantısı Göster
                             </label>
+                        </div>
+                    </>
+                );
+
+            case 'contact':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Bölüm Başlığı</label>
+                            <input
+                                type="text"
+                                value={component.data?.title || ''}
+                                onChange={(e) => updateField('title', e.target.value)}
+                                placeholder="Bize Ulaşın"
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Alt Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.subtitle || ''}
+                                onChange={(e) => updateField('subtitle', e.target.value)}
+                                placeholder="Size yardımcı olmaktan mutluluk duyarız"
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
+                            <input
+                                type="text"
+                                value={component.data?.buttonText || ''}
+                                onChange={(e) => updateField('buttonText', e.target.value)}
+                                placeholder="Gönder"
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🎨 Renk Ayarları</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Arkaplan</label>
+                                    <input
+                                        type="color"
+                                        value={component.data?.bgColor || '#1f2937'}
+                                        onChange={(e) => updateField('bgColor', e.target.value)}
+                                        className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Buton Rengi</label>
+                                    <input
+                                        type="color"
+                                        value={component.data?.buttonColor || '#3b82f6'}
+                                        onChange={(e) => updateField('buttonColor', e.target.value)}
+                                        className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🔗 Link Ayarları</p>
+                            <div>
+                                <label className="block text-xs text-dark-400 mb-1">Form Gönderim Linki</label>
+                                <input
+                                    type="text"
+                                    value={component.data?.buttonLink || ''}
+                                    onChange={(e) => updateField('buttonLink', e.target.value)}
+                                    placeholder="https://formspree.io/yourform"
+                                    className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-sm text-dark-300 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={component.data?.showForm !== false}
+                                    onChange={(e) => updateField('showForm', e.target.checked)}
+                                    className="rounded border-dark-600"
+                                />
+                                Form Göster
+                            </label>
+                        </div>
+                    </>
+                );
+
+            case 'newsletter':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Başlık</label>
+                            <input
+                                type="text"
+                                value={component.data?.title || ''}
+                                onChange={(e) => updateField('title', e.target.value)}
+                                placeholder="Bültene Abone Ol"
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Açıklama</label>
+                            <input
+                                type="text"
+                                value={component.data?.subtitle || ''}
+                                onChange={(e) => updateField('subtitle', e.target.value)}
+                                placeholder="En son haberler ve güncellemeler için..."
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Buton Metni</label>
+                            <input
+                                type="text"
+                                value={component.data?.buttonText || ''}
+                                onChange={(e) => updateField('buttonText', e.target.value)}
+                                placeholder="Abone Ol"
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-dark-400 mb-1">Placeholder</label>
+                            <input
+                                type="text"
+                                value={component.data?.placeholder || ''}
+                                onChange={(e) => updateField('placeholder', e.target.value)}
+                                placeholder="E-posta adresiniz"
+                                className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                            />
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🎨 Renk Ayarları</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Arkaplan</label>
+                                    <input
+                                        type="color"
+                                        value={component.data?.bgColor || '#4f46e5'}
+                                        onChange={(e) => updateField('bgColor', e.target.value)}
+                                        className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-dark-400 mb-1">Buton Rengi</label>
+                                    <input
+                                        type="color"
+                                        value={component.data?.buttonColor || '#ffffff'}
+                                        onChange={(e) => updateField('buttonColor', e.target.value)}
+                                        className="w-full h-10 bg-dark-800 border border-dark-700 rounded-lg cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="border-t border-dark-700 pt-4 mt-4">
+                            <p className="text-xs text-primary-400 font-medium mb-3">🔗 Link Ayarları</p>
+                            <div>
+                                <label className="block text-xs text-dark-400 mb-1">Form Gönderim Linki</label>
+                                <input
+                                    type="text"
+                                    value={component.data?.buttonLink || ''}
+                                    onChange={(e) => updateField('buttonLink', e.target.value)}
+                                    placeholder="https://mailchimp.com/yourlist"
+                                    className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white focus:border-primary-500"
+                                />
+                            </div>
                         </div>
                     </>
                 );
@@ -4674,37 +5065,58 @@ const PropertyEditor = ({ component, onClose, updateComponent, selectComponent, 
 const WidgetSearch = ({ data }) => {
     const [query, setQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const [results, setResults] = useState([]);
+    const [showResults, setShowResults] = useState(false);
+
+    // Mock search logic
+    useEffect(() => {
+        if (query.length > 1) {
+            setIsSearching(true);
+            const debounce = setTimeout(() => {
+                setResults([
+                    `Sonuç: ${query} hakkında makale`,
+                    `Ürün: ${query} Pro`,
+                    `Kategori: ${query} Listesi`
+                ]);
+                setIsSearching(false);
+                setShowResults(true);
+            }, 600);
+            return () => clearTimeout(debounce);
+        } else {
+            setResults([]);
+            setShowResults(false);
+        }
+    }, [query]);
 
     const handleSearch = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!query) return;
-        setIsSearching(true);
-        setTimeout(() => {
-            alert(`"${query}" için arama yapılıyor... (Demo)`);
-            setIsSearching(false);
-            setQuery('');
-        }, 1000);
+        alert(`"${query}" için tüm sonuçlar listeleniyor... (Demo)`);
+        setShowResults(false);
     };
 
     return (
-        <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100 relative z-20">
             <form
                 onSubmit={handleSearch}
                 className={`relative flex items-center ${data?.style === 'rounded' ? 'rounded-full' : data?.style === 'classic' ? 'rounded-none' : 'rounded-lg'} overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-primary-500 transition-all`}
+                onClick={(e) => e.stopPropagation()} // Stop propagation on container
             >
-                <Search className="w-5 h-5 text-gray-400 absolute left-3" />
+                <Search className="w-5 h-5 text-gray-400 absolute left-3 pointer-events-none" />
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onMouseDown={(e) => e.stopPropagation()}
+                    onFocus={(e) => e.stopPropagation()}
                     placeholder={data?.placeholder || 'Ara...'}
                     className="w-full py-3 pl-10 pr-4 outline-none bg-transparent text-gray-700 placeholder-gray-400"
+                    autoComplete="off"
                 />
                 <button
                     type="submit"
                     onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
                     disabled={isSearching}
                     className={`px-6 py-3 font-medium text-white transition-colors ${data?.style === 'rounded' ? 'rounded-full my-1 mr-1' : ''} bg-primary-600 hover:bg-primary-700 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2`}
                 >
@@ -4715,13 +5127,37 @@ const WidgetSearch = ({ data }) => {
                     )}
                 </button>
             </form>
+
+            {/* Mock Dropdown Results */}
+            {showResults && results.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden animate-fade-in-up">
+                    <ul>
+                        {results.map((res, i) => (
+                            <li
+                                key={i}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    alert(`"${res}" seçildi.`);
+                                    setQuery('');
+                                    setShowResults(false);
+                                }}
+                                className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 flex items-center gap-2 border-b border-gray-50 last:border-0 transition-colors"
+                            >
+                                <Search className="w-3 h-3 text-gray-400" />
+                                {res}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 };
 
 const WidgetSocial = ({ data }) => {
     return (
-        <div className="p-4 flex gap-3 flex-wrap justify-center">
+        <div className="p-4 flex gap-3 flex-wrap justify-center bg-white/50 rounded-xl backdrop-blur-sm">
             {(data?.icons || []).map((icon, i) => (
                 <a
                     key={i}
@@ -4729,7 +5165,15 @@ const WidgetSocial = ({ data }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     onMouseDown={(e) => e.stopPropagation()}
-                    className={`flex items-center justify-center w-10 h-10 transition-all transform hover:scale-110 ${data?.style === 'circle' ? 'rounded-full' : data?.style === 'square' ? 'rounded-lg' : 'rounded-none'} ${data?.color === 'brand' ? 'bg-primary-50 text-primary-600 hover:bg-primary-600 hover:text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-800 hover:text-white'}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        // Optional: Simulating link click behavior for demo if href is '#'
+                        if (icon.url === '#' || !icon.url) {
+                            e.preventDefault();
+                            alert(`${icon.network} bağlantısına tıklandı.`);
+                        }
+                    }}
+                    className={`flex items-center justify-center w-10 h-10 transition-all transform hover:scale-110 active:scale-95 duration-200 shadow-sm hover:shadow-md ${data?.style === 'circle' ? 'rounded-full' : data?.style === 'square' ? 'rounded-lg' : 'rounded-none'} ${data?.color === 'brand' ? 'bg-primary-50 text-primary-600 hover:bg-primary-600 hover:text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-800 hover:text-white'}`}
                 >
                     {icon.network === 'facebook' && <span className="font-bold">f</span>}
                     {icon.network === 'twitter' && <span className="font-bold">t</span>}
@@ -4743,25 +5187,44 @@ const WidgetSocial = ({ data }) => {
 
 const WidgetCalendar = ({ data }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDay, setSelectedDay] = useState(new Date().getDate());
 
     // Generate real days for current month
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
     const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay(); // 0 = Sunday
     const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Turkish (Mon=0) logic if needed, but let's stick to standard grid
 
+    const changeMonth = (offset) => {
+        const newDate = new Date(currentDate.setMonth(currentDate.getMonth() + offset));
+        setCurrentDate(new Date(newDate)); // Create new Date object to force re-render
+    };
+
     return (
         <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg text-gray-800">
+                <button
+                    onClick={(e) => { e.stopPropagation(); changeMonth(-1); }}
+                    className="p-1 hover:bg-gray-100 rounded text-gray-500"
+                >
+                    ←
+                </button>
+                <h3 className="font-bold text-lg text-gray-800 cursor-pointer select-none" onClick={(e) => { e.stopPropagation(); setCurrentDate(new Date()); }}>
                     {data?.title || currentDate.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
                 </h3>
-                <div className="flex gap-1">
+                <button
+                    onClick={(e) => { e.stopPropagation(); changeMonth(1); }}
+                    className="p-1 hover:bg-gray-100 rounded text-gray-500"
+                >
+                    →
+                </button>
+                {/* Traffic Lights Decoration */}
+                {/* <div className="flex gap-1 ml-2">
                     <span className="w-2 h-2 rounded-full bg-red-400"></span>
                     <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
                     <span className="w-2 h-2 rounded-full bg-green-400"></span>
-                </div>
+                </div> */}
             </div>
-            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+            <div className="grid grid-cols-7 gap-1 text-center mb-2 select-none">
                 {['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'].map(d => (
                     <div key={d} className="text-xs font-medium text-gray-400 py-1">{d}</div>
                 ))}
@@ -4773,20 +5236,29 @@ const WidgetCalendar = ({ data }) => {
                 ))}
 
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
-                    // Highlight today
+                    // Check if is Today
                     const isToday = day === new Date().getDate() &&
                         currentDate.getMonth() === new Date().getMonth() &&
                         currentDate.getFullYear() === new Date().getFullYear();
+
+                    const isSelected = selectedDay === day;
 
                     const hasEvent = data?.events?.some(e => e.day === day);
 
                     return (
                         <div
                             key={day}
-                            className={`text-sm py-2 rounded-lg relative cursor-default transition-colors ${isToday ? 'bg-primary-600 text-white font-bold shadow-md transform scale-105' : 'text-gray-600 hover:bg-gray-50'}`}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDay(day);
+                            }}
+                            className={`text-sm w-8 h-8 mx-auto flex items-center justify-center rounded-full relative cursor-pointer transition-all duration-200
+                                ${isSelected ? 'bg-primary-600 text-white font-bold shadow-md transform scale-110' :
+                                    isToday ? 'bg-primary-100 text-primary-700 font-bold box-border border-2 border-primary-200' : 'text-gray-600 hover:bg-gray-100'}`}
                         >
                             {day}
-                            {hasEvent && !isToday && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary-500 rounded-full"></span>}
+                            {hasEvent && !isSelected && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-red-400 rounded-full"></span>}
                         </div>
                     );
                 })}
@@ -4806,8 +5278,11 @@ const WidgetList = ({ data, type }) => {
                         <span
                             key={i}
                             onMouseDown={(e) => e.stopPropagation()}
-                            onClick={() => alert(`${item.label} (${item.count}) filtrelendi.`)}
-                            className="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-sm font-medium hover:bg-primary-50 hover:text-primary-600 cursor-pointer transition-colors border border-gray-100"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                alert(`${item.label} (${item.count}) filtrelendi.`);
+                            }}
+                            className="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-sm font-medium hover:bg-primary-50 hover:text-primary-600 cursor-pointer transition-colors border border-gray-100 select-none"
                         >
                             {item.label} <span className="text-gray-400 text-xs ml-1">({item.count})</span>
                         </span>
@@ -4815,8 +5290,11 @@ const WidgetList = ({ data, type }) => {
                         <div
                             key={i}
                             onMouseDown={(e) => e.stopPropagation()}
-                            onClick={() => alert(`${item.label} arşivine gidiliyor.`)}
-                            className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                alert(`${item.label} arşivine gidiliyor.`);
+                            }}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer group transition-colors select-none"
                         >
                             <span className="text-gray-600 group-hover:text-primary-600 font-medium transition-colors">{item.label}</span>
                             <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs group-hover:bg-primary-100 group-hover:text-primary-600 transition-colors">{item.count}</span>
@@ -4837,16 +5315,19 @@ const WidgetPosts = ({ data }) => {
                     <div
                         key={i}
                         onMouseDown={(e) => e.stopPropagation()}
-                        onClick={() => alert(`"${post.title}" yazısı açılıyor...`)}
-                        className="flex gap-4 group cursor-pointer"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            alert(`"${post.title}" yazısı açılıyor...`);
+                        }}
+                        className="flex gap-4 group cursor-pointer bg-transparent hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors"
                     >
                         {data?.showImage && (
-                            <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden relative">
+                            <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden relative shadow-sm">
                                 <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                             </div>
                         )}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
                             <div className="text-xs text-primary-600 font-medium mb-1">{post.date}</div>
                             <h4 className="text-sm font-bold text-gray-800 leading-snug group-hover:text-primary-600 transition-colors line-clamp-2">{post.title}</h4>
                         </div>
@@ -4859,17 +5340,31 @@ const WidgetPosts = ({ data }) => {
 
 const WidgetWeather = ({ data }) => {
     const [time, setTime] = useState(new Date());
+    const [unit, setUnit] = useState('C'); // C or F
 
     useEffect(() => {
-        const timer = setInterval(() => setTime(new Date()), 60000);
+        const timer = setInterval(() => setTime(new Date()), 1000); // Live seconds
         return () => clearInterval(timer);
     }, []);
 
+    const toggleUnit = (e) => {
+        e.stopPropagation();
+        setUnit(prev => prev === 'C' ? 'F' : 'C');
+    };
+
     const isCard = data?.style === 'card';
-    const formattedTime = time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    const formattedTime = time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // Values
+    const tempC = 24;
+    const tempF = Math.round((tempC * 9 / 5) + 32);
+    const displayTemp = unit === 'C' ? tempC : tempF;
 
     return isCard ? (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-400 to-blue-600 p-8 text-white shadow-xl group">
+        <div
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-400 to-blue-600 p-8 text-white shadow-xl group cursor-pointer"
+            onClick={toggleUnit}
+        >
             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors duration-500"></div>
             <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl group-hover:bg-purple-500/30 transition-colors duration-500"></div>
 
@@ -4877,35 +5372,44 @@ const WidgetWeather = ({ data }) => {
                 <div className="flex justify-between items-start mb-8">
                     <div>
                         <h3 className="text-2xl font-bold tracking-tight">{data?.city}</h3>
-                        <p className="text-blue-100 text-sm font-medium">{formattedTime} • Parçalı Bulutlu</p>
+                        <p className="text-blue-100 text-sm font-medium font-mono">{formattedTime} • Parçalı Bulutlu</p>
                     </div>
-                    <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl group-hover:bg-white/30 transition-colors">
+                    <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl group-hover:bg-white/30 transition-colors shadow-lg">
                         <Globe className="w-8 h-8 text-white animate-pulse" />
                     </div>
                 </div>
 
                 <div className="flex items-end justify-between">
                     <div className="flex flex-col">
-                        <span className="text-6xl font-bold tracking-tighter">24°</span>
-                        <span className="text-blue-100 text-sm mt-1">Hissedilen: 26°</span>
+                        <span className="text-6xl font-bold tracking-tighter transition-all duration-300">
+                            {displayTemp}<span className="text-4xl align-top">°{unit}</span>
+                        </span>
+                        <span className="text-blue-100 text-sm mt-1">Hissedilen: {unit === 'C' ? 26 : Math.round((26 * 9 / 5) + 32)}°</span>
                     </div>
                     <div className="space-y-1 text-right">
                         <div className="text-sm text-blue-100">Nem: %45</div>
                         <div className="text-sm text-blue-100">Rüzgar: 12 km/s</div>
+                        <div className="text-[10px] text-white/50 bg-white/10 px-2 py-0.5 rounded-full inline-block mt-2">Birim için tıkla</div>
                     </div>
                 </div>
             </div>
         </div>
     ) : (
-        <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 group hover:border-blue-200 transition-colors">
+        <div
+            className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 group hover:border-blue-200 transition-colors cursor-pointer"
+            onClick={toggleUnit}
+        >
             <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors">
                 <Globe className="w-6 h-6" />
             </div>
             <div>
                 <div className="font-bold text-gray-900">{data?.city}</div>
-                <div className="text-sm text-gray-500">24° Parçalı Bulutlu</div>
+                <div className="text-sm text-gray-500 font-mono">{formattedTime}</div>
             </div>
-            <div className="ml-auto text-2xl font-bold text-gray-900">24°</div>
+            <div className="ml-auto text-2xl font-bold text-gray-900 flex flex-col items-end">
+                <span>{displayTemp}°{unit}</span>
+                <span className="text-[10px] text-gray-400 font-normal">Tıkla: {unit === 'C' ? 'F' : 'C'}</span>
+            </div>
         </div>
     );
 };
@@ -5648,28 +6152,50 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
                 );
 
             case 'newsletter':
+                const nlBgColor = component.data?.bgColor || '#4f46e5';
+                const nlBtnColor = component.data?.buttonColor || '#ffffff';
                 return (
-                    <div className="py-16 px-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                    <div
+                        className="py-16 px-8 text-white"
+                        style={{ backgroundColor: nlBgColor }}
+                    >
                         <div className="max-w-2xl mx-auto text-center">
                             <h2 className="text-3xl font-bold mb-4">{component.data?.title || 'Bültene Abone Olun'}</h2>
                             <p className="opacity-90 mb-6">{component.data?.subtitle || 'Haberdar olun'}</p>
-                            <div className="flex gap-3 max-w-md mx-auto">
+                            <form
+                                action={component.data?.buttonLink || '#'}
+                                method="POST"
+                                className="flex gap-3 max-w-md mx-auto"
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 <input
                                     type="email"
                                     placeholder={component.data?.placeholder || 'E-posta adresiniz'}
                                     className="flex-1 px-4 py-3 rounded-lg text-gray-900"
                                 />
-                                <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold">
+                                <button
+                                    type="submit"
+                                    className="px-6 py-3 rounded-lg font-semibold transition-all hover:opacity-90"
+                                    style={{ backgroundColor: nlBtnColor, color: nlBgColor }}
+                                >
                                     {component.data?.buttonText || 'Abone Ol'}
                                 </button>
-                            </div>
+                            </form>
+                            {component.data?.buttonLink && (
+                                <p className="mt-3 text-xs opacity-60">Form: {component.data.buttonLink}</p>
+                            )}
                         </div>
                     </div>
                 );
 
             case 'contact':
+                const ctBgColor = component.data?.bgColor || '#1f2937';
+                const ctBtnColor = component.data?.buttonColor || '#3b82f6';
                 return (
-                    <div className="py-16 px-8 bg-gray-900 text-white">
+                    <div
+                        className="py-16 px-8 text-white"
+                        style={{ backgroundColor: ctBgColor }}
+                    >
                         <h2 className="text-3xl font-bold text-center mb-4">{component.data?.title || 'İletişim'}</h2>
                         <p className="text-center text-gray-400 mb-12">{component.data?.subtitle || 'Bizimle iletişime geçin'}</p>
                         <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
@@ -5688,12 +6214,26 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
                                 </div>
                             </div>
                             {component.data?.showForm !== false && (
-                                <div className="space-y-4">
+                                <form
+                                    action={component.data?.buttonLink || '#'}
+                                    method="POST"
+                                    className="space-y-4"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     <input className="w-full p-3 bg-gray-800 rounded-lg" placeholder="Adınız" />
                                     <input className="w-full p-3 bg-gray-800 rounded-lg" placeholder="E-posta" />
                                     <textarea className="w-full p-3 bg-gray-800 rounded-lg" placeholder="Mesajınız" rows={3} />
-                                    <button className="w-full bg-blue-600 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Gönder</button>
-                                </div>
+                                    <button
+                                        type="submit"
+                                        className="w-full py-3 rounded-lg font-semibold transition-all hover:opacity-90"
+                                        style={{ backgroundColor: ctBtnColor }}
+                                    >
+                                        {component.data?.buttonText || 'Gönder'}
+                                    </button>
+                                    {component.data?.buttonLink && (
+                                        <p className="text-xs text-gray-500 text-center">Form: {component.data.buttonLink}</p>
+                                    )}
+                                </form>
                             )}
                         </div>
                     </div>
@@ -6073,18 +6613,245 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
             case 'products':
                 const products = component.data?.items || [];
                 return (
-                    <div className="py-16 px-8 bg-gray-50">
-                        <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">{component.data?.title || 'Ürünler'}</h2>
+                    <div className="py-16 px-8 bg-gradient-to-b from-slate-50 to-white">
+                        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">{component.data?.title || 'Ürünler'}</h2>
+                        {component.data?.subtitle && (
+                            <p className="text-center text-gray-500 mb-12">{component.data.subtitle}</p>
+                        )}
                         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                            {(products.length > 0 ? products : [1, 2, 3].map(i => ({ name: `Ürün ${i}`, price: '₺999', image: `https://picsum.photos/300/300?random=${i}` }))).map((product, i) => (
-                                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                                    <img src={product.image} alt={product.name} className="w-full h-48 object-cover" />
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-gray-800">{product.name}</h3>
-                                        <p className="text-blue-600 font-bold">{product.price}</p>
+                            {(products.length > 0 ? products : [
+                                { name: 'Premium Ürün', price: '₺999', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300', link: '#' },
+                                { name: 'Özel Koleksiyon', price: '₺1.299', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300', link: '#' },
+                                { name: 'Sınırlı Seri', price: '₺1.599', image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300', link: '#' }
+                            ]).map((product, i) => (
+                                <div key={i} className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                                    <div className="relative overflow-hidden">
+                                        <img src={product.image} alt={product.name} className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-500" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </div>
+                                    <div className="p-5">
+                                        <h3 className="font-bold text-gray-900 text-lg mb-1">{product.name}</h3>
+                                        <p className="text-2xl font-black text-indigo-600 mb-4">{product.price}</p>
+                                        <a
+                                            href={product.link || component.data?.cartLink || '#'}
+                                            onClick={(e) => { e.stopPropagation(); }}
+                                            className="block w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold text-center hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-indigo-500/30"
+                                        >
+                                            🛒 {component.data?.buttonText || 'Sepete Ekle'}
+                                        </a>
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                );
+
+            // ═══════════════════════════════════════════════════════════════
+            // E-COMMERCE COMPONENTS
+            // ═══════════════════════════════════════════════════════════════
+
+            case 'productcard':
+                return (
+                    <div className="py-8 px-8 bg-gray-50">
+                        <div className="max-w-sm mx-auto bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group">
+                            <div className="relative overflow-hidden">
+                                <img
+                                    src={component.data?.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'}
+                                    alt={component.data?.name || 'Ürün'}
+                                    className="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                />
+                                {component.data?.badge && (
+                                    <div className="absolute top-4 left-4 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                                        {component.data.badge}
+                                    </div>
+                                )}
+                                {component.data?.inStock === false && (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                        <span className="text-white font-bold text-lg">Tükendi</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-6">
+                                <h3 className="font-bold text-gray-900 text-lg mb-2">{component.data?.name || 'Premium Ürün'}</h3>
+                                <div className="flex items-center gap-1 mb-3">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <span key={star} className={`text-sm ${star <= Math.round(component.data?.rating || 4.5) ? 'text-amber-400' : 'text-gray-300'}`}>★</span>
+                                    ))}
+                                    <span className="text-xs text-gray-400 ml-1">({component.data?.rating || 4.5})</span>
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-2xl font-black text-gray-900">{component.data?.price || '₺999'}</span>
+                                    {component.data?.oldPrice && (
+                                        <span className="text-sm text-gray-400 line-through">{component.data.oldPrice}</span>
+                                    )}
+                                </div>
+                                <a
+                                    href={component.data?.cartLink || '#'}
+                                    onClick={(e) => { e.stopPropagation(); }}
+                                    className="mt-4 w-full py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl font-semibold hover:from-gray-800 hover:to-gray-700 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                                >
+                                    🛒 {component.data?.buttonText || 'Sepete Ekle'}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                );
+
+            case 'productgrid':
+                const gridProducts = component.data?.products || [];
+                const gridCols = component.data?.columns || 3;
+                return (
+                    <div className="py-16 px-8 bg-gradient-to-b from-white to-slate-50">
+                        <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">{component.data?.title || 'Popüler Ürünler'}</h2>
+                        {component.data?.subtitle && (
+                            <p className="text-center text-gray-500 mb-12">{component.data.subtitle}</p>
+                        )}
+                        <div className={`grid gap-6 max-w-5xl mx-auto`} style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}>
+                            {(gridProducts.length > 0 ? gridProducts : [
+                                { name: 'Akıllı Saat', price: '₺2.499', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300', link: '#' },
+                                { name: 'Kablosuz Kulaklık', price: '₺1.299', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300', link: '#' },
+                                { name: 'Güneş Gözlüğü', price: '₺899', image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300', link: '#' }
+                            ]).map((product, i) => (
+                                <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                                    <div className="relative overflow-hidden">
+                                        <img src={product.image} alt={product.name} className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                    <div className="p-5">
+                                        <h4 className="font-bold text-gray-900 mb-1">{product.name}</h4>
+                                        <p className="text-xl font-black text-indigo-600 mb-4">{product.price}</p>
+                                        <a
+                                            href={product.link || component.data?.cartLink || '#'}
+                                            onClick={(e) => { e.stopPropagation(); }}
+                                            className="block w-full py-2.5 bg-gray-900 text-white rounded-lg font-medium text-center hover:bg-gray-800 transition-colors text-sm"
+                                        >
+                                            🛒 {component.data?.buttonText || 'Sepete Ekle'}
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+
+            case 'cartbutton':
+                const btnStyle = component.data?.style || 'primary';
+                const btnSize = component.data?.size || 'medium';
+                const sizeClasses = { small: 'px-4 py-2 text-sm', medium: 'px-6 py-3', large: 'px-8 py-4 text-lg' };
+                const styleClasses = {
+                    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
+                    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
+                    outline: 'border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50'
+                };
+                return (
+                    <div className="py-8 px-8 flex justify-center">
+                        <a
+                            href={component.data?.link || '#'}
+                            onClick={(e) => { e.stopPropagation(); }}
+                            className={`${sizeClasses[btnSize]} ${styleClasses[btnStyle]} ${component.data?.fullWidth ? 'w-full' : ''} rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg no-underline`}
+                        >
+                            <span>{component.data?.icon || '🛒'}</span>
+                            <span>{component.data?.text || 'Sepete Ekle'}</span>
+                        </a>
+                    </div>
+                );
+
+            case 'pricedisplay':
+                const savings = component.data?.oldPrice ?
+                    Math.round(((parseFloat(component.data.oldPrice.replace(/[^0-9.]/g, '')) - parseFloat(component.data.price.replace(/[^0-9.]/g, ''))) / parseFloat(component.data.oldPrice.replace(/[^0-9.]/g, ''))) * 100) : 0;
+                return (
+                    <div className="py-8 px-8 flex justify-center">
+                        <div className="text-center">
+                            <div className="flex items-baseline justify-center gap-3">
+                                <span className="text-5xl font-black text-gray-900">{component.data?.price || '₺1.499'}</span>
+                                {component.data?.period && <span className="text-gray-400">{component.data.period}</span>}
+                            </div>
+                            {component.data?.oldPrice && (
+                                <div className="mt-2 flex items-center justify-center gap-3">
+                                    <span className="text-xl text-gray-400 line-through">{component.data.oldPrice}</span>
+                                    {component.data?.showSavings && savings > 0 && (
+                                        <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-2 py-1 rounded">
+                                            %{savings} Tasarruf
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+
+            case 'salebadge':
+                const badgeType = component.data?.type || 'sale';
+                const badgeColors = {
+                    sale: 'bg-rose-500 text-white',
+                    new: 'bg-emerald-500 text-white',
+                    hot: 'bg-orange-500 text-white',
+                    limited: 'bg-purple-500 text-white'
+                };
+                return (
+                    <div className="py-8 px-8 flex justify-center">
+                        <div className={`inline-block ${badgeColors[badgeType]} text-sm font-bold px-4 py-2 rounded-full ${component.data?.animated ? 'animate-pulse' : ''}`}>
+                            {component.data?.text || '%30 İndirim'}
+                        </div>
+                    </div>
+                );
+
+            case 'countdown':
+                // Calculate countdown values from targetDate
+                const getCountdownValues = () => {
+                    if (!component.data?.isActive || !component.data?.targetDate) {
+                        return { days: 23, hours: 12, minutes: 45, seconds: 59 }; // Demo values
+                    }
+                    const target = new Date(component.data.targetDate).getTime();
+                    const now = Date.now();
+                    const diff = Math.max(0, target - now);
+                    return {
+                        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+                        seconds: Math.floor((diff % (1000 * 60)) / 1000)
+                    };
+                };
+                const countdownVals = getCountdownValues();
+                return (
+                    <div
+                        className="py-10 px-8"
+                        style={{
+                            backgroundColor: component.data?.bgColor || '#dc2626',
+                            color: component.data?.textColor || '#ffffff'
+                        }}
+                    >
+                        <h3 className="text-xl font-bold text-center mb-6">{component.data?.title || 'Kampanya Bitiyor!'}</h3>
+                        {component.data?.isActive && (
+                            <div className="text-xs text-center mb-4 opacity-80">
+                                ⏱️ Geri sayım aktif
+                            </div>
+                        )}
+                        <div className="flex justify-center gap-4">
+                            {component.data?.showDays !== false && (
+                                <div className="text-center bg-black/20 rounded-xl px-5 py-4 min-w-[80px]">
+                                    <div className="text-4xl font-black">{String(countdownVals.days).padStart(2, '0')}</div>
+                                    <div className="text-xs opacity-80">GÜN</div>
+                                </div>
+                            )}
+                            {component.data?.showHours !== false && (
+                                <div className="text-center bg-black/20 rounded-xl px-5 py-4 min-w-[80px]">
+                                    <div className="text-4xl font-black">{String(countdownVals.hours).padStart(2, '0')}</div>
+                                    <div className="text-xs opacity-80">SAAT</div>
+                                </div>
+                            )}
+                            {component.data?.showMinutes !== false && (
+                                <div className="text-center bg-black/20 rounded-xl px-5 py-4 min-w-[80px]">
+                                    <div className="text-4xl font-black">{String(countdownVals.minutes).padStart(2, '0')}</div>
+                                    <div className="text-xs opacity-80">DAKİKA</div>
+                                </div>
+                            )}
+                            {component.data?.showSeconds !== false && (
+                                <div className="text-center bg-black/20 rounded-xl px-5 py-4 min-w-[80px]">
+                                    <div className="text-4xl font-black">{String(countdownVals.seconds).padStart(2, '0')}</div>
+                                    <div className="text-xs opacity-80">SANİYE</div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 );
@@ -6248,6 +7015,107 @@ const ComponentPreview = ({ component, isSelected, onSelect, onDelete }) => {
 
             case 'weather':
                 return <WidgetWeather data={component.data} />;
+
+            case 'loginform':
+                const lfBgColor = component.data?.bgColor || '#f8fafc';
+                const lfBtnColor = component.data?.buttonColor || '#4f46e5';
+                return (
+                    <div
+                        className="py-16 px-8"
+                        style={{ backgroundColor: lfBgColor }}
+                    >
+                        <div className="max-w-md mx-auto">
+                            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                                {/* Header with dynamic color */}
+                                <div
+                                    className="px-8 py-10 text-center"
+                                    style={{ background: `linear-gradient(135deg, ${lfBtnColor}, ${lfBtnColor}dd)` }}
+                                >
+                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                                        <span className="text-3xl">🔐</span>
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-white">{component.data?.title || 'Hoş Geldiniz'}</h2>
+                                    <p className="text-white/70 mt-2">{component.data?.subtitle || 'Hesabınıza giriş yapın'}</p>
+                                </div>
+
+                                {/* Form */}
+                                <form
+                                    action={component.data?.buttonLink || '#'}
+                                    method="POST"
+                                    className="px-8 py-8 space-y-5"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                                        <input
+                                            type="email"
+                                            placeholder="ornek@email.com"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                                        <input
+                                            type="password"
+                                            placeholder="••••••••"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <label className="flex items-center gap-2 text-gray-600 cursor-pointer">
+                                            <input type="checkbox" className="rounded border-gray-300 text-indigo-600" />
+                                            Beni hatırla
+                                        </label>
+                                        {component.data?.showForgotPassword !== false && (
+                                            <a href="#" className="font-medium hover:opacity-80" style={{ color: lfBtnColor }}>Şifremi unuttum</a>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="w-full py-3.5 text-white rounded-xl font-semibold hover:opacity-90 transition-all duration-300"
+                                        style={{ backgroundColor: lfBtnColor }}
+                                    >
+                                        {component.data?.buttonText || 'Giriş Yap'}
+                                    </button>
+
+                                    {component.data?.buttonLink && (
+                                        <p className="text-xs text-gray-400 text-center">Form: {component.data.buttonLink}</p>
+                                    )}
+
+                                    {/* Divider */}
+                                    <div className="relative my-6">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <div className="w-full border-t border-gray-200"></div>
+                                        </div>
+                                        <div className="relative flex justify-center text-sm">
+                                            <span className="px-4 bg-white text-gray-400">veya</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Social Login */}
+                                    <div className="flex gap-3">
+                                        <button type="button" className="flex-1 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                                            <span className="text-xl">🔵</span>
+                                            <span className="text-sm font-medium text-gray-600">Google</span>
+                                        </button>
+                                        <button type="button" className="flex-1 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                                            <span className="text-xl">⚫</span>
+                                            <span className="text-sm font-medium text-gray-600">GitHub</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Register Link */}
+                                    {component.data?.showRegisterLink !== false && (
+                                        <p className="text-center text-gray-600 mt-6">
+                                            Hesabınız yok mu?{' '}
+                                            <a href="#" className="font-semibold hover:opacity-80" style={{ color: lfBtnColor }}>Kayıt Ol</a>
+                                        </p>
+                                    )}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                );
 
             default:
                 return (

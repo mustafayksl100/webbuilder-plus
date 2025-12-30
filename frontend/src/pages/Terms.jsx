@@ -325,9 +325,7 @@ const Terms = () => {
                                 <p className="text-[#0A0E14] font-bold text-lg mb-2" style={{ fontFamily: 'Sora, sans-serif' }}>
                                     Designed & Developed by Kutay & Mustafa
                                 </p>
-                                <p className="text-[#6A737D] text-sm" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                                    with ❤️ and lots of ☕
-                                </p>
+
                             </div>
                         </div>
                     </section>

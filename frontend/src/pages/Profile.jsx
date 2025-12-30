@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
@@ -21,6 +21,8 @@ const Profile = () => {
     // Profile form
     const [fullName, setFullName] = useState(user?.fullName || '');
     const [isUpdating, setIsUpdating] = useState(false);
+    const fileInputRef = useRef(null);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
     // Password form
     const [currentPassword, setCurrentPassword] = useState('');
@@ -46,6 +48,41 @@ const Profile = () => {
         } finally {
             setIsUpdating(false);
         }
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validasyon (Max 2MB, Resim)
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Dosya boyutu 2MB\'dan küçük olmalı');
+            return;
+        }
+        if (!file.type.startsWith('image/')) {
+            toast.error('Lütfen geçerli bir resim dosyası seçin');
+            return;
+        }
+
+        setIsUploadingAvatar(true);
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const base64String = reader.result;
+            try {
+                // Backend'e gönder
+                const response = await api.put('/auth/profile', { avatarUrl: base64String });
+
+                // Store güncelle
+                updateUser({ avatarUrl: response.data.data.avatarUrl });
+                toast.success('Profil fotoğrafı güncellendi');
+            } catch (error) {
+                console.error('Avatar upload failed:', error);
+                toast.error('Fotoğraf yüklenemedi');
+            } finally {
+                setIsUploadingAvatar(false);
+            }
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleChangePassword = async (e) => {
@@ -100,12 +137,33 @@ const Profile = () => {
                     <div className="flex items-center gap-4">
                         {/* Avatar */}
                         <div className="relative">
-                            <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-purple-500 rounded-full flex items-center justify-center text-3xl font-bold text-white">
-                                {user?.fullName?.charAt(0) || 'U'}
+                            <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white overflow-hidden border-4 border-dark-800 shadow-xl relative group" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}>
+                                {user?.avatarUrl ? (
+                                    <img src={user.avatarUrl} alt={user.fullName} className="w-full h-full object-cover" />
+                                ) : (
+                                    user?.fullName?.charAt(0) || 'U'
+                                )}
+
+                                {isUploadingAvatar && (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                    </div>
+                                )}
                             </div>
-                            <button className="absolute bottom-0 right-0 w-8 h-8 bg-dark-700 hover:bg-dark-600 border-2 border-dark-800 rounded-full flex items-center justify-center transition-colors">
-                                <Camera className="w-4 h-4 text-dark-300" />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploadingAvatar}
+                                className="absolute bottom-0 right-0 w-8 h-8 bg-dark-700 hover:bg-emerald-500 border-2 border-dark-800 rounded-full flex items-center justify-center transition-all group-hover:scale-110 shadow-lg text-emerald-400 hover:text-white"
+                            >
+                                <Camera className="w-4 h-4" />
                             </button>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*"
+                                className="hidden"
+                            />
                         </div>
 
                         {/* Info */}
@@ -131,8 +189,8 @@ const Profile = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
-                                    ? 'text-primary-400 border-b-2 border-primary-400 bg-primary-500/5'
-                                    : 'text-dark-400 hover:text-white'
+                                ? 'text-primary-400 border-b-2 border-primary-400 bg-primary-500/5'
+                                : 'text-dark-400 hover:text-white'
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />
@@ -170,6 +228,7 @@ const Profile = () => {
                                     <input
                                         type="email"
                                         value={user?.email || ''}
+                                        readOnly
                                         disabled
                                         className="w-full pl-12 pr-4 py-3 bg-dark-700/50 border border-dark-600 rounded-lg text-dark-400 cursor-not-allowed"
                                     />
