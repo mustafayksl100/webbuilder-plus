@@ -5,6 +5,9 @@ import { useAuthStore } from './store/authStore';
 // Layout
 import Layout from './components/layout/Layout';
 
+// Components
+import { MobileBlocker } from './components/MobileBlocker';
+
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -56,6 +59,9 @@ const PublicRoute = ({ children }) => {
 function App() {
     return (
         <Router>
+            {/* Mobile Device Blocker */}
+            <MobileBlocker />
+
             {/* Toast Notifications */}
             <Toaster
                 position="top-right"
